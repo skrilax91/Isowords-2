@@ -1,0 +1,39 @@
+{
+  "loader": {
+    "name": "java_plain",
+    "version": "1.0"
+  },
+  "license": "MIT",
+  "global": {
+    "version": "2.0.0",
+    "links": {
+      "homepage": "https://www.spongepowered.org",
+      "source": "https://github.com/skrilax91/Isowords-2",
+      "issues": "https://github.com/skrilax91/Isowords-2/issues"
+    },
+    "contributors": [
+      {
+        "name": "Devix",
+        "description": "Main Developer"
+      },
+      {
+        "name": "Sythiel",
+        "description": "Original Developer"
+      }
+    ],
+    "dependencies": [
+      {
+        "id": "spongeapi",
+        "version": "9.0.0"
+      }
+    ]
+  },
+  "plugins": [
+    {
+      "id": "isoworlds2",
+      "name": "IsoWorlds 2",
+      "entrypoint": "sponge.Main",
+      "description": "Large scale personal world manager"
+    }
+  ]
+}
