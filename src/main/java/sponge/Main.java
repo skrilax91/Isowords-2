@@ -198,7 +198,7 @@ public class Main implements IMain {
 
         // Copy lang.yml if not in config folder
         // thx @ryantheleac for intellij module path
-        try {
+        /*try {
             final Path localePath = Paths.get(configuration.getParent());
             final Asset asset = this.pluginContainer.getAsset("lang.yml").orElse(null);
             if (!new File(localePath.toString() + "/lang.yml").exists()) {
@@ -208,7 +208,7 @@ public class Main implements IMain {
             }
         } catch (IOException io) {
             io.printStackTrace();
-        }
+        }*/
 
         this.cooldown = new Cooldown(this.database, this.servername, "sponge", this.commonLogger);
 

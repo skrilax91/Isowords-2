@@ -49,15 +49,20 @@
 package sponge.util.action;
 
 import common.ManageFiles;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.border.WorldBorder;
+import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.api.world.storage.WorldProperties;
 import sponge.Main;
+import sponge.location.Locations;
 import sponge.util.console.Logger;
 
 import java.io.IOException;
@@ -69,6 +74,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -105,43 +111,43 @@ public class DimsAltAction {
         // Create world properties Isoworlds
 
         // Check si world properties en place, création else
-        CompletableFuture<Optional<ServerWorldProperties>> wp = Sponge.server().worldManager().loadProperties(ResourceKey.brigadier(worldname));
+        CompletableFuture<Optional<ServerWorldProperties>> fwp = Sponge.server().worldManager().loadProperties(ResourceKey.brigadier(worldname));
         ServerWorldProperties worldProperties;
 
         try {
+
+            Optional<ServerWorldProperties> wp = fwp.get();
+
             if (wp.isPresent()) {
                 worldProperties = wp.get();
                 Logger.info("WOLRD PROPERTIES: déjà présent");
-                worldProperties.setKeepSpawnLoaded(true);
+                //worldProperties.setKeepSpawnLoaded(true);
                 worldProperties.setLoadOnStartup(true);
-                worldProperties.setGenerateSpawnOnLoad(false);
-                worldProperties.setPVPEnabled(false);
-                worldProperties.setWorldBorderCenter(0, 0);
-                worldProperties.setWorldBorderDiameter(6000);
-                worldProperties.setEnabled(true);
-                Sponge.getServer().saveWorldProperties(worldProperties);
+                worldProperties.setPerformsSpawnLogic(false);
+                worldProperties.setPvp(false);
+
+                Sponge.server().worldManager().saveProperties(worldProperties);
                 // Border
-                Optional<World> world = Sponge.getServer().getWorld(worldname);
-                if (world.isPresent()) {
-                    world.get().getWorldBorder().setDiameter(6000);
-                }
+                Optional<ServerWorld> world = Sponge.server().worldManager().world(ResourceKey.brigadier(worldname));
+                world.ifPresent(serverWorld -> serverWorld.setBorder(WorldBorder.builder().center(0, 0).targetDiameter(6000).build()));
                 Logger.warning("Border nouveau: " + 6000);
             } else {
-                worldProperties = Sponge.getServer().createWorldProperties(worldname, WorldArchetypes.OVERWORLD);
-                Logger.info("WOLRD PROPERTIES: non présents, création...");
-                worldProperties.setKeepSpawnLoaded(true);
-                worldProperties.setLoadOnStartup(true);
-                worldProperties.setGenerateSpawnOnLoad(false);
-                worldProperties.setPVPEnabled(false);
-                worldProperties.setWorldBorderCenter(0, 0);
-                worldProperties.setWorldBorderDiameter(6000);
-                Sponge.server().worldManager().saveProperties(worldProperties);
+                WorldTemplate template = WorldTemplate.builder()
+                        .displayName(Component.text(worldname))
+                        .loadOnStartup(true)
+                        .performsSpawnLogic(false)
+                        .pvp(false)
+                        .build();
+                sponge.util.console.Logger.info("WOLRD PROPERTIES: non présents, création...");
+                Sponge.server().worldManager().loadWorld(template);
+
+                Optional<ServerWorld> world = Sponge.server().worldManager().world(ResourceKey.brigadier(worldname));
+                world.ifPresent(serverWorld -> serverWorld.setBorder(WorldBorder.builder().center(0, 0).targetDiameter(6000).build()));
                 Logger.warning("Border nouveau: " + 6000);
             }
             Logger.info("WorldProperties à jour");
-
-        } catch (IOException ie) {
-            ie.printStackTrace();
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 

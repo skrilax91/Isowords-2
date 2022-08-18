@@ -56,7 +56,7 @@ public class Commands implements CommandExecutor {
             throw new CommandException(Component.text("Your are not a player.", NamedTextColor.RED));
         }
 
-        pPlayer.openInventory(MainInv.menuPrincipal(pPlayer));
+        pPlayer.openInventory(MainInv.menuPrincipal(pPlayer).inventory());
         return CommandResult.success();
     }
 

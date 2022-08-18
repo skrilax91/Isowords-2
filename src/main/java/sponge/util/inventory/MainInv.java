@@ -27,172 +27,119 @@ package sponge.util.inventory;
 import common.IsoChat;
 import common.action.ChargeAction;
 import common.action.PlayTimeAction;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.type.SkullTypes;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryArchetypes;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.property.InventoryDimension;
-import org.spongepowered.api.item.inventory.property.InventoryTitle;
-import org.spongepowered.api.item.inventory.property.SlotPos;
+import org.spongepowered.api.item.inventory.*;
+import org.spongepowered.api.item.inventory.menu.ClickType;
+import org.spongepowered.api.item.inventory.menu.ClickTypes;
+import org.spongepowered.api.item.inventory.menu.InventoryMenu;
+import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
+import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 import sponge.location.Locations;
 import sponge.util.console.Logger;
 import sponge.util.inventory.biome.BiomeInv;
 import sponge.util.inventory.build.BuildInv;
-import sponge.util.inventory.enable.EnableInv;
-import sponge.util.inventory.home.HomeInv;
-import sponge.util.inventory.teleport.TeleportInv;
 import sponge.util.inventory.time.TimeInv;
 import sponge.util.inventory.trust.TrustInv;
 import sponge.util.inventory.warp.WarpInv;
 import sponge.util.inventory.weather.WeatherInv;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static common.Msg.msgNode;
-import static sponge.Main.instance;
 
 public class MainInv {
 
-    public static Inventory menuPrincipal(Player pPlayer) {
+    public static InventoryMenu menuPrincipal(ServerPlayer pPlayer) {
 
-        Inventory menu = Inventory.builder()
-                .of(InventoryArchetypes.CHEST)
-                .listener(ClickInventoryEvent.class, clickInventoryEvent -> {
-                    // Code event
-                    clickInventoryEvent.setCancelled(true);
-                    Logger.info("CURSOR 2 " + String.valueOf(clickInventoryEvent.getTransactions().get(0).getOriginal().get(Keys.DISPLAY_NAME).get().toPlain()));
-                    String menuName = String.valueOf(clickInventoryEvent.getTransactions().get(0).getOriginal().get(Keys.DISPLAY_NAME).get().toPlain());
-                    // MENU PRINCIPAL //
-                    // BIOME
-                    if (menuName.equals(msgNode.get("InvBiome"))) {
-                        Logger.tracking("Clic menu BIOME: " + pPlayer.getName());
-                        closeOpenMenu(pPlayer, BiomeInv.getInv(pPlayer));
-                        // CONFIANCE
-                    } else if (menuName.equals(msgNode.get("InvTrust"))) {
-                        Logger.tracking("Clic menu CONFIANCE: " + pPlayer.getName());
-                        closeOpenMenu(pPlayer, TrustInv.getInv(pPlayer));
-                        // CONSTRUCTION
-                    } else if (menuName.equals(msgNode.get("InvBuild"))) {
-                        Logger.tracking("Clic menu CONSTRUCTION: " + pPlayer.getName());
-                        closeOpenMenu(pPlayer, BuildInv.getInv(pPlayer));
-                        // MAISON
-                    } else if (menuName.equals(msgNode.get("InvHome"))) {
-                        Logger.tracking("Clic menu MAISON: " + pPlayer.getName());
-                        closeOpenMenu(pPlayer, HomeInv.getInv(pPlayer));
-                        // METEO
-                    } else if (menuName.equals(msgNode.get("InvWeather"))) {
-                        Logger.tracking("Clic menu METEO: " + pPlayer.getName());
-                        closeOpenMenu(pPlayer, WeatherInv.getInv(pPlayer));
-                        // ACTIVATION
-                    } else if (menuName.equals(msgNode.get("InvEnable"))) {
-                        Logger.tracking("Clic menu ACTIVATION: " + pPlayer.getName());
-                        closeOpenMenu(pPlayer, EnableInv.getInv(pPlayer));
-                        // TELEPORTATION
-                    } else if (menuName.equals(msgNode.get("InvTeleport"))) {
-                        Logger.tracking("Clic menu TELEPORTATION: " + pPlayer.getName());
-                        closeOpenMenu(pPlayer, TeleportInv.getInv(pPlayer));
-                    } else if (menuName.equals(msgNode.get("InvTime"))) {
-                        Logger.tracking("Clic menu TEMPS: " + pPlayer.getName());
-                        closeOpenMenu(pPlayer, TimeInv.getInv(pPlayer));
-                    } else if (menuName.equals(msgNode.get("InvWarp"))) {
-                        Logger.tracking("Clic menu WARP: " + pPlayer.getName());
-                        closeOpenMenu(pPlayer, WarpInv.getInv(pPlayer));
-                    } else if (menuName.equals(msgNode.get("InvIsochat"))) {
-                        IsoChat.toggle(pPlayer.getUniqueId());
-                        closeOpenMenu(pPlayer, menuPrincipal(pPlayer));
-                    }
-
-                })
-                .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of(Text.builder("Isoworlds")
-                        .color(TextColors.BLUE).build())))
-                .property(InventoryDimension.PROPERTY_NAME, InventoryDimension.of(9, 2))
-                .build(instance);
+        ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X2).completeStructure().carrier(pPlayer).build();
+        InventoryMenu menu = inventory.asMenu();
+        menu.setReadOnly(true);
+        menu.setTitle(Component.text("Isoworlds"));
 
         // Récupération nombre charge
         Integer charges = ChargeAction.getCharge(pPlayer);
-        Integer playtime = PlayTimeAction.getPlayTime(pPlayer.getUniqueId().toString());
-        String formatedPlayTime;
-
-        if (playtime > 60) {
-            formatedPlayTime = playtime / 60 + " H " + playtime % 60 + " m";
-        } else {
-            formatedPlayTime = playtime + " m";
-        }
-
-        // Création item
-        List<Text> list1 = new ArrayList<Text>();
-        list1.add(Text.of(msgNode.get("InvBiomeLore")));
-        List<Text> list2 = new ArrayList<Text>();
-        list2.add(Text.of(msgNode.get("InvTrustLore")));
-        List<Text> list3 = new ArrayList<Text>();
-        list3.add(Text.of(msgNode.get("InvBuildLore")));
-        List<Text> list4 = new ArrayList<Text>();
-        list4.add(Text.of(msgNode.get("InvHomeLore")));
-        List<Text> list5 = new ArrayList<Text>();
-        list5.add(Text.of(msgNode.get("InvWeatherLore")));
-        list5.add(Text.of(msgNode.get("InvWeatherLore2")));
-        List<Text> list6 = new ArrayList<Text>();
-        list6.add(Text.of(msgNode.get("InvEnableLore")));
-        List<Text> list7 = new ArrayList<Text>();
-        list7.add(Text.of(msgNode.get("InvWarpLore")));
-        List<Text> list8 = new ArrayList<Text>();
-        list8.add(Text.of(msgNode.get("InvTimeLore")));
-        List<Text> list9 = new ArrayList<Text>();
-        list9.add(Text.of(Text.builder(msgNode.get("InvStatChargeLore")).color(TextColors.YELLOW).append(Text.of(Text.builder(charges + " disponible(s)").color(TextColors.GREEN))).build()));
-        List<Text> list10 = new ArrayList<Text>();
-        list10.add(Text.of(Text.builder(msgNode.get("InvIsochatLore")).build()));
-        list10.add(Text.of(Text.builder(msgNode.get("InvIsochatLore2")).build()));
-        list10.add(Text.of((IsoChat.isActivated(pPlayer.getUniqueId()) ? Text.builder(msgNode.get("InvIsochatEnabled")).color(TextColors.GREEN).build() : Text.builder(msgNode.get("InvIsochatDisabled")).
-                color(TextColors.RED).build())));
-
-        ItemStack item1 = ItemStack.builder().itemType(ItemTypes.DIAMOND_PICKAXE).add(Keys.ITEM_LORE, list3).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("InvBuild"))
-                .color(TextColors.GRAY).build())).quantity(1).build();
-        ItemStack item2 = ItemStack.builder().itemType(ItemTypes.BED).add(Keys.ITEM_LORE, list4).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("InvHome"))
-                .color(TextColors.BLUE).build())).quantity(1).build();
-        ItemStack item3 = ItemStack.builder().itemType(ItemTypes.SKULL).add(Keys.SKULL_TYPE, SkullTypes.PLAYER).add(Keys.ITEM_LORE, list2).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("InvTrust"))
-                .color(TextColors.GREEN).build())).quantity(1).build();
-        ItemStack item4 = ItemStack.builder().itemType(ItemTypes.LEAVES).add(Keys.ITEM_LORE, list1).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("InvBiome"))
-                .color(TextColors.GOLD).build())).quantity(1).build();
-        ItemStack item5 = ItemStack.builder().itemType(ItemTypes.CLOCK).add(Keys.ITEM_LORE, list8).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("InvTime"))
-                .color(TextColors.LIGHT_PURPLE).build())).quantity(1).build();
-        ItemStack item6 = ItemStack.builder().itemType(ItemTypes.DOUBLE_PLANT).add(Keys.ITEM_LORE, list5).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("InvWeather"))
-                .color(TextColors.YELLOW).build())).quantity(1).build();
-        ItemStack item7 = ItemStack.builder().itemType(ItemTypes.COMPASS).add(Keys.ITEM_LORE, list7).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("InvWarp"))
-                .color(TextColors.DARK_GREEN).build())).quantity(1).build();
-        ItemStack item9 = ItemStack.builder().itemType(ItemTypes.LEVER).add(Keys.ITEM_LORE, list9).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("InvStat"))
-                .color(TextColors.AQUA).build())).quantity(1).build();
-        ItemStack item10 = ItemStack.builder().itemType(ItemTypes.SIGN).add(Keys.ITEM_LORE, list10).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("InvIsochat"))
-                .color(TextColors.WHITE).build())).quantity(1).build();
-
-        //ItemStack item7 = ItemStack.builder().itemType(ItemTypes.LEVER).add(Keys.ITEM_LORE, list6).add(Keys.DISPLAY_NAME, Text.of(Text.builder("Activation")
-        //        .color(TextColors.RED).build())).quantity(1).build();
-        //ItemStack item8 = ItemStack.builder().itemType(ItemTypes.DIAMOND_BOOTS).add(Keys.ITEM_LORE, list7).add(Keys.DISPLAY_NAME, Text.of(Text.builder("Téléportation")
-        //        .color(TextColors.LIGHT_PURPLE).build())).quantity(1).build();
+        Integer playtime = PlayTimeAction.getPlayTime(pPlayer.uniqueId().toString());
+        String formatedPlayTime = (playtime > 60) ? playtime / 60 + " H " + playtime % 60 + " m" : playtime + " m";
 
 
-        // Placement item dans le menu
-        menu.query(SlotPos.of(0, 0)).set(item1);
-        menu.query(SlotPos.of(1, 0)).set(item2);
-        menu.query(SlotPos.of(2, 0)).set(item3);
-        menu.query(SlotPos.of(3, 0)).set(item4);
-        menu.query(SlotPos.of(4, 0)).set(item5);
-        menu.query(SlotPos.of(5, 0)).set(item6);
-        menu.query(SlotPos.of(6, 0)).set(item7);
-        menu.query(SlotPos.of(8, 0)).set(item9);
-        menu.query(SlotPos.of(0, 1)).set(item10);
+        // Build Mode
+        List<Component> list1 = new ArrayList<>();
+        list1.add(Component.text(msgNode.get("InvBiomeLore")));
+        ItemStack item1 = ItemStack.builder().itemType(ItemTypes.DIAMOND_PICKAXE).add(Keys.LORE, list1).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("InvBuild"))
+                .color(NamedTextColor.GRAY)).quantity(1).build();
+        menu.inventory().set(0, item1);
+
+        // Home
+        List<Component> list2 = new ArrayList<>();
+        list2.add(Component.text(msgNode.get("InvHomeLore")));
+        ItemStack item2 = ItemStack.builder().itemType(ItemTypes.RED_BED).add(Keys.LORE, list2).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("InvHome"))
+                .color(NamedTextColor.BLUE)).quantity(1).build();
+        menu.inventory().set(1, item2);
+
+        // Trust Menu
+        List<Component> list3 = new ArrayList<>();
+        list3.add(Component.text(msgNode.get("InvTrustLore")));
+        ItemStack item3 = ItemStack.builder().itemType(ItemTypes.PLAYER_HEAD).add(Keys.LORE, list3).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("InvTrust"))
+                .color(NamedTextColor.GREEN)).quantity(1).build();
+        menu.inventory().set(2, item3);
+
+        // Biome Menu
+        List<Component> list4 = new ArrayList<>();
+        list4.add(Component.text(msgNode.get("InvBiomeLore")));
+        ItemStack item4 = ItemStack.builder().itemType(ItemTypes.OAK_LEAVES).add(Keys.LORE, list4).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("InvBiome"))
+                .color(NamedTextColor.GOLD)).quantity(1).build();
+        menu.inventory().set(3, item4);
+
+
+        // Time Menu
+        List<Component> list5 = new ArrayList<>();
+        list5.add(Component.text(msgNode.get("InvTimeLore")));
+        ItemStack item5 = ItemStack.builder().itemType(ItemTypes.CLOCK).add(Keys.LORE, list5).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("InvTime"))
+                .color(NamedTextColor.LIGHT_PURPLE)).quantity(1).build();
+        menu.inventory().set(4, item5);
+
+        // Weather Menu
+        List<Component> list6 = new ArrayList<>();
+        list6.add(Component.text(msgNode.get("InvWeatherLore")));
+        list6.add(Component.text(msgNode.get("InvWeatherLore2")));
+        ItemStack item6 = ItemStack.builder().itemType(ItemTypes.CHORUS_PLANT).add(Keys.LORE, list6).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("InvWeather"))
+                .color(NamedTextColor.YELLOW)).quantity(1).build();
+        menu.inventory().set(5, item6);
+
+        // Warp Menu
+        List<Component> list7 = new ArrayList<>();
+        list7.add(Component.text(msgNode.get("InvWarpLore")));
+        ItemStack item7 = ItemStack.builder().itemType(ItemTypes.COMPASS).add(Keys.LORE, list7).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("InvWarp"))
+                .color(NamedTextColor.DARK_GREEN)).quantity(1).build();
+        menu.inventory().set(6, item7);
+
+        // Charge Info
+        List<Component> list9 = new ArrayList<>();
+        list9.add(Component.text(msgNode.get("InvStatChargeLore")).color(NamedTextColor.YELLOW).append(Component.text(charges + " disponible(s)").color(NamedTextColor.GREEN)));
+        ItemStack item9 = ItemStack.builder().itemType(ItemTypes.LEVER).add(Keys.LORE, list9).add(Keys.DISPLAY_NAME, Component.text("InvStat")
+                .color(NamedTextColor.AQUA)).quantity(1).build();
+        menu.inventory().set(8, item9);
+
+        // Isochat Info
+        List<Component> list10 = new ArrayList<>();
+        list10.add(Component.text(msgNode.get("InvIsochatLore")));
+        list10.add(Component.text(msgNode.get("InvIsochatLore2")));
+        list10.add((IsoChat.isActivated(pPlayer.uniqueId()) ? Component.text(msgNode.get("InvIsochatEnabled")).color(NamedTextColor.GREEN) : Component.text(msgNode.get("InvIsochatDisabled")).
+                color(NamedTextColor.RED)));
+        ItemStack item10 = ItemStack.builder().itemType(ItemTypes.OAK_SIGN).add(Keys.LORE, list10).add(Keys.DISPLAY_NAME, Component.text("InvIsochat")
+                .color(NamedTextColor.WHITE)).quantity(1).build();
+        menu.inventory().set(9, item10);
 
         // STAFF
         //if (pPlayer.hasPermission("isworlds.menu.activation")) {
@@ -203,53 +150,70 @@ public class MainInv {
         //}
         //menu.query(SlotPos.of(7, 0)).set(item8);
 
+        menu.registerSlotClick(new SlotClickHandler() {
+            @Override
+            public boolean handle(Cause cause, Container container, Slot slot, int slotIndex, ClickType<?> clickType) {
+                if(clickType != ClickTypes.CLICK_LEFT.get() && clickType != ClickTypes.CLICK_RIGHT.get()) return false;
+
+                switch (slotIndex) {
+                    case 0: closeOpenMenu(pPlayer, BuildInv.getInv(pPlayer));
+                        break;
+                    case 1: MainInv.commandMenu(pPlayer, "iw h");
+                        MainInv.closeMenu(pPlayer);
+                        break;
+                    case 2: closeOpenMenu(pPlayer, TrustInv.getInv(pPlayer));
+                        break;
+                    case 3: closeOpenMenu(pPlayer, BiomeInv.getInv(pPlayer));
+                        break;
+                    case 4: closeOpenMenu(pPlayer, TimeInv.getInv(pPlayer));
+                        break;
+                    case 5: closeOpenMenu(pPlayer, WeatherInv.getInv(pPlayer));
+                        break;
+                    case 6: closeOpenMenu(pPlayer, WarpInv.getInv(pPlayer));
+                        break;
+                    case 9: IsoChat.toggle(pPlayer.uniqueId());
+                        closeOpenMenu(pPlayer, menuPrincipal(pPlayer));
+                        break;
+
+                    default:
+                        return false;
+                }
+
+                return false;
+            }
+        });
+
         return menu;
     }
 
-    public static void closeOpenMenu(Player pPlayer, Inventory inv) {
-        Task.builder().execute(new Runnable() {
-            @Override
-            public void run() {
-                pPlayer.closeInventory(Cause.of(NamedCause.simulated(pPlayer)));
-                pPlayer.openInventory(inv, Cause.of(NamedCause.simulated(pPlayer)));
-            }
-        })
-                .delay(10, TimeUnit.MILLISECONDS)
-                .name("Ferme l'inventaire d'un joueur et en ouvre un autre.").submit(instance);
+    public static void closeOpenMenu(ServerPlayer pPlayer, InventoryMenu inv) {
+        Sponge.asyncScheduler().submit(Task.builder().execute(() -> {
+            pPlayer.closeInventory();
+            pPlayer.openInventory(inv.inventory());
+        }).delay(10, TimeUnit.MILLISECONDS).build(), "Ferme l'inventaire d'un joueur et en ouvre un autre.");
     }
 
-    public static void closeMenu(Player pPlayer) {
-        Task.builder().execute(new Runnable() {
-            @Override
-            public void run() {
-                pPlayer.closeInventory(Cause.of(NamedCause.simulated(pPlayer)));
-                pPlayer.openInventory(menuPrincipal(pPlayer), Cause.of(NamedCause.simulated(pPlayer)));
-            }
-        })
-                .delay(10, TimeUnit.MILLISECONDS)
-                .name("Ferme l'inventaire d'un joueur.").submit(instance);
+    public static void closeMenu(ServerPlayer pPlayer) {
+        Sponge.asyncScheduler().submit(Task.builder().execute(() -> {
+            pPlayer.closeInventory();
+            pPlayer.openInventory(menuPrincipal(pPlayer).inventory());
+        }).delay(10, TimeUnit.MILLISECONDS).build(), "Ferme l'inventaire d'un joueur.");
     }
 
-    public static void commandMenu(Player pPlayer, String cmd) {
-        Task.builder().execute(new Runnable() {
-            @Override
-            public void run() {
-                Sponge.getCommandManager().process(pPlayer, cmd);
+    public static void commandMenu(ServerPlayer pPlayer, String cmd) {
+        Sponge.asyncScheduler().submit(Task.builder().execute(() -> {
+            try {
+                Sponge.server().commandManager().process(pPlayer, cmd);
+            } catch (CommandException e) {
+                throw new RuntimeException(e);
             }
-        })
-                .delay(10, TimeUnit.MILLISECONDS)
-                .name("Execute une commande pour le joueur.").submit(instance);
+        }).delay(10, TimeUnit.MILLISECONDS).build(), "Execute une commande pour le joueur.");
     }
 
     public static void teleportMenu(Player pPlayer, String cmd) {
-        Task.builder().execute(new Runnable() {
-            @Override
-            public void run() {
-                Logger.info("TP CMD: " + cmd);
-                Locations.teleport(pPlayer, cmd);
-            }
-        })
-                .delay(10, TimeUnit.MILLISECONDS)
-                .name("Téléporte le joueur dans un Isoworld.").submit(instance);
+        Sponge.asyncScheduler().submit(Task.builder().execute(() -> {
+            Logger.info("TP CMD: " + cmd);
+            Locations.teleport(pPlayer, cmd);
+        }).delay(10, TimeUnit.MILLISECONDS).build(), "Téléporte le joueur dans un Isoworld.");
     }
 }

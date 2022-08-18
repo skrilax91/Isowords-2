@@ -26,25 +26,23 @@ package sponge.util.inventory.trust.sub;
 
 import common.Cooldown;
 import common.action.TrustAction;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
-import org.spongepowered.api.data.manipulator.mutable.SkullData;
-import org.spongepowered.api.data.type.SkullTypes;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryArchetypes;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.property.InventoryDimension;
-import org.spongepowered.api.item.inventory.property.InventoryTitle;
-import org.spongepowered.api.item.inventory.property.SlotPos;
+import org.spongepowered.api.item.inventory.*;
+import org.spongepowered.api.item.inventory.menu.ClickType;
+import org.spongepowered.api.item.inventory.menu.ClickTypes;
+import org.spongepowered.api.item.inventory.menu.InventoryMenu;
+import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
+import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 import sponge.Main;
 import sponge.location.Locations;
 import sponge.util.action.StatAction;
@@ -53,10 +51,7 @@ import sponge.util.console.Logger;
 import sponge.util.inventory.MainInv;
 
 import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static common.Msg.msgNode;
@@ -66,112 +61,95 @@ public class TrustAccessInv {
 
     private static final Main plugin = Main.instance;
 
-    public static Inventory getInv(Player pPlayer) {
+    public static InventoryMenu getInv(ServerPlayer pPlayer) {
 
-        Inventory menu = Inventory.builder()
-                .of(InventoryArchetypes.CHEST)
-                .listener(ClickInventoryEvent.class, clickInventoryEvent -> {
-                    // Code event
-                    String menuName = String.valueOf(clickInventoryEvent.getTransactions()
-                            .get(0).getOriginal().get(Keys.ITEM_LORE).get().get(0).toPlain());
-                    String menuPlayer = String.valueOf(clickInventoryEvent.getTransactions()
-                            .get(0).getOriginal().get(Keys.DISPLAY_NAME).get().toPlain());
-                    Logger.info("CURSOR 2 " + String.valueOf(clickInventoryEvent.getTransactions().get(0).getOriginal().get(Keys.DISPLAY_NAME).get().toPlain()));
-                    clickInventoryEvent.setCancelled(true);
+        ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X4).completeStructure().carrier(pPlayer).build();
+        InventoryMenu menu = inventory.asMenu();
+        menu.setReadOnly(true);
+        menu.setTitle(Component.text("Isoworlds: > " + msgNode.get("TrustAccess")).color(NamedTextColor.BLUE));
 
-                    // Si joueur, on ajoute le joueur
-                    if (menuPlayer.contains(msgNode.get("TrustAccessLore2"))) {
-                        // Récupération UUID
-                        String[] tmp = menuName.split("-Isoworld");
-                        Logger.info("NAME " + menuName);
-                        Optional<User> user = StatAction.getPlayerFromUUID(UUID.fromString(tmp[0]));
-                        String worldname = user.get().getUniqueId().toString() + "-Isoworld";
+        List<Component> list9 = new ArrayList<>();
+        list9.add(Component.text(msgNode.get("MainMenuLore")));
 
-                        // Si la méthode renvoi vrai alors on return car le lock est défini pour l'import, sinon elle le set auto
-                        if (StorageAction.iwInProcess(pPlayer, worldname)) {
-                            return;
-                        }
+        ItemStack item9 = ItemStack.builder().itemType(ItemTypes.GOLD_BLOCK).add(Keys.LORE, list9).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("MainMenu"))
+                .color(NamedTextColor.RED)).quantity(1).build();
+        menu.inventory().set(35, item9);
 
-                        // Pull du Isoworld
-                        Task.builder().execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                // Si monde présent en dossier ?
-                                // Removing iwInProcess in task
-                                if (StorageAction.checkTag(pPlayer, worldname)) {
-                                    // Chargement du Isoworld + tp
-                                    sponge.util.action.IsoworldsAction.setWorldProperties(worldname, pPlayer);
-                                    Sponge.getServer().loadWorld(worldname);
-                                    Locations.teleport(pPlayer, worldname);
-                                    plugin.cooldown.addPlayerCooldown(pPlayer, Cooldown.CONFIANCE, Cooldown.CONFIANCE_DELAY);
-                                }
+        ResultSet trusts = TrustAction.getAccess(pPlayer.uniqueId().toString());
 
-                                // Supprime le lock (worldname, worldname uniquement pour les access confiance)
-                                Main.lock.remove(worldname + ";" + worldname);
-
-                            }
-                        })
-                                .delay(1, TimeUnit.SECONDS)
-                                .name("Pull du Isoworld.").submit(instance);
-
-                        MainInv.closeOpenMenu(pPlayer, MainInv.menuPrincipal(pPlayer));
-
-                    } else if (menuName.contains(msgNode.get("MainMenuLore"))) {
-                        MainInv.closeOpenMenu(pPlayer, MainInv.menuPrincipal(pPlayer));
-                    }
-                })
-                .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of(Text.builder("Isoworlds: > " + msgNode.get("TrustAccess")).color(TextColors.BLUE).build())))
-                .property(InventoryDimension.PROPERTY_NAME, InventoryDimension.of(9, 4))
-                .build(instance);
-
-        int i = 0;
-        int j = 0;
-        ResultSet trusts = TrustAction.getAccess(pPlayer.getUniqueId().toString());
         try {
-            while (trusts.next()) {
+            for (int i = 0; Objects.requireNonNull(trusts).next(); ++i) {
+
                 // Récupération uuid
                 String[] tmp = trusts.getString(1).split("-Isoworld");
                 UUID uuid = UUID.fromString(tmp[0]);
                 Optional<User> user = StatAction.getPlayerFromUUID(uuid);
 
                 // Dont show own access
-                if (user.get().getName().equals(pPlayer.getName())) {
+                if (!user.isPresent() || user.get().name().equals(pPlayer.name())) {
                     continue;
                 }
 
                 // Construction du lore
-                List<Text> list1 = new ArrayList<Text>();
-                list1.add(Text.of(user.get().getUniqueId().toString()));
-                Logger.info("record: " + trusts.getString(1));
+                List<Component> list1 = new ArrayList<>();
+                list1.add(Component.text(user.get().uniqueId().toString()));
+
+                ItemStack item1 = ItemStack.builder().itemType(ItemTypes.PLAYER_HEAD).add(Keys.LORE, list1).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("TrustAccessLore2") + ": " + user.get().name())
+                        .color(NamedTextColor.GOLD)).quantity(1).build();
+                menu.inventory().set(i, item1);
 
                 // Construction des skin itemstack
-                SkullData data = Sponge.getGame().getDataManager().getManipulatorBuilder(SkullData.class).get().create();
-                data.set(Keys.SKULL_TYPE, SkullTypes.PLAYER);
-                ItemStack stack = Sponge.getGame().getRegistry().createBuilder(ItemStack.Builder.class).itemType(ItemTypes.SKULL).itemData(data)
-                        .add(Keys.ITEM_LORE, list1).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("TrustAccessLore2") + ": " + user.get().getName())
-                                .color(TextColors.GOLD).build())).quantity(1)
-                        .build();
-                RepresentedPlayerData skinData = Sponge.getGame().getDataManager().getManipulatorBuilder(RepresentedPlayerData.class).get().create();
-                Logger.info("USER: " + user.get().getUniqueId().toString() + user.get().getName());
-                skinData.set(Keys.REPRESENTED_PLAYER, GameProfile.of(user.get().getUniqueId(), user.get().getName()));
-                stack.offer(skinData);
-
-                if (i >= 8) {
-                    j = j++;
-                }
-                menu.query(SlotPos.of(i, j)).set(stack);
-                i++;
+                /*SkullData data = Sponge.getGame().getDataManager().getManipulatorBuilder(SkullData.class).get().create();
+                data.set(Keys.SKULL_TYPE, SkullTypes.PLAYER);*/
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        List<Text> list2 = new ArrayList<Text>();
-        list2.add(Text.of(msgNode.get("MainMenuLore")));
+        menu.registerSlotClick(new SlotClickHandler() {
+            @Override
+            public boolean handle(Cause cause, Container container, Slot slot, int slotIndex, ClickType<?> clickType) {
+                if(clickType != ClickTypes.CLICK_LEFT.get() && clickType != ClickTypes.CLICK_RIGHT.get()) return false;
 
-        ItemStack item2 = ItemStack.builder().itemType(ItemTypes.GOLD_BLOCK).add(Keys.ITEM_LORE, list2).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("MainMenu"))
-                .color(TextColors.RED).build())).quantity(1).build();
-        menu.query(SlotPos.of(8, 3)).set(item2);
+                if (slotIndex == 35) {
+                    MainInv.closeOpenMenu(pPlayer, MainInv.menuPrincipal(pPlayer));
+                    return false;
+                }
+
+                if (slot.totalQuantity() != 0) {
+                    String uuid = slot.get(Keys.LORE).get().get(0).toString().split("-Isoworld")[0];
+                    Logger.info("NAME " + uuid);
+                    Optional<User> user = StatAction.getPlayerFromUUID(UUID.fromString(uuid));
+                    String worldname = uuid + "-Isoworld";
+
+                    // Si la méthode renvoi vrai alors on return car le lock est défini pour l'import, sinon elle le set auto
+                    if (StorageAction.iwInProcess(pPlayer, worldname))
+                        return false;
+
+                    // Pull du Isoworld
+                    Sponge.asyncScheduler().submit(Task.builder().execute(() -> {
+                        // Si monde présent en dossier ?
+                        // Removing iwInProcess in task
+                        if (StorageAction.checkTag(pPlayer, worldname)) {
+                            // Chargement du Isoworld + tp
+                            sponge.util.action.IsoworldsAction.setWorldProperties(worldname, pPlayer);
+                            Sponge.server().worldManager().loadWorld(ResourceKey.brigadier(worldname));
+                            Locations.teleport(pPlayer, worldname);
+                            plugin.cooldown.addPlayerCooldown(pPlayer, Cooldown.CONFIANCE, Cooldown.CONFIANCE_DELAY);
+                        }
+
+                        // Supprime le lock (worldname, worldname uniquement pour les access confiance)
+                        Main.lock.remove(worldname + ";" + worldname);
+
+                    }).delay(1, TimeUnit.SECONDS).build(), "Pull du Isoworld.");
+
+                    MainInv.closeOpenMenu(pPlayer, MainInv.menuPrincipal(pPlayer));
+
+                }
+
+                return false;
+            }
+        });
 
         return menu;
     }

@@ -24,18 +24,18 @@
  */
 package sponge.util.inventory.warp;
 
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryArchetypes;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.property.InventoryDimension;
-import org.spongepowered.api.item.inventory.property.InventoryTitle;
-import org.spongepowered.api.item.inventory.property.SlotPos;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.item.inventory.*;
+import org.spongepowered.api.item.inventory.menu.ClickType;
+import org.spongepowered.api.item.inventory.menu.ClickTypes;
+import org.spongepowered.api.item.inventory.menu.InventoryMenu;
+import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
+import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import sponge.util.inventory.MainInv;
 
 import java.util.ArrayList;
@@ -45,79 +45,40 @@ import static common.Msg.msgNode;
 import static sponge.Main.instance;
 
 public class WarpInv {
-    public static Inventory getInv(Player pPlayer) {
+    public static InventoryMenu getInv(ServerPlayer pPlayer) {
 
-        Inventory menu = Inventory.builder()
-                .of(InventoryArchetypes.CHEST)
-                .listener(ClickInventoryEvent.class, clickInventoryEvent -> {
-                    // Code event
-                    String menuName = String.valueOf(clickInventoryEvent.getTransactions()
-                            .get(0).getOriginal().get(Keys.DISPLAY_NAME).get().toPlain());
-                    clickInventoryEvent.setCancelled(true);
-                    if (menuName.contains(msgNode.get("WarpExploration"))) {
-                        MainInv.commandMenu(pPlayer, "iw warp exploration");
-                        MainInv.closeMenu(pPlayer);
-                    } else if (menuName.contains(msgNode.get("WarpMining"))) {
-                        MainInv.commandMenu(pPlayer, "iw warp minage");
-                        MainInv.closeMenu(pPlayer);
-                    } else if (menuName.contains(msgNode.get("WarpEnd"))) {
-                        MainInv.commandMenu(pPlayer, "iw warp end");
-                        MainInv.closeMenu(pPlayer);
-                    } else if (menuName.contains(msgNode.get("WarpNether"))) {
-                        MainInv.commandMenu(pPlayer, "iw warp nether");
-                        MainInv.closeMenu(pPlayer);
-                    } else if (menuName.contains(msgNode.get("MainMenu"))) {
-                        MainInv.closeOpenMenu(pPlayer, MainInv.menuPrincipal(pPlayer));
-                    }
-                })
-                .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of(Text.builder("Isoworlds: " + msgNode.get("InvWarp")).color(TextColors.DARK_GREEN).build())))
-                .property(InventoryDimension.PROPERTY_NAME, InventoryDimension.of(9, 2))
-                .build(instance);
+        ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X1).completeStructure().carrier(pPlayer).build();
+        InventoryMenu menu = inventory.asMenu();
+        menu.setReadOnly(true);
+        menu.setTitle(Component.text("Isoworlds: " + msgNode.get("InvWarp")).color(NamedTextColor.DARK_GREEN));
 
-        // Minage
-        List<Text> list1 = new ArrayList<Text>();
-        list1.add(Text.of(msgNode.get("WarpMiningLore")));
-        list1.add(Text.of(msgNode.get("WarpMiningLore2")));
+        menu.registerSlotClick(new SlotClickHandler() {
+            @Override
+            public boolean handle(Cause cause, Container container, Slot slot, int slotIndex, ClickType<?> clickType) {
+                if(clickType != ClickTypes.CLICK_LEFT.get() && clickType != ClickTypes.CLICK_RIGHT.get()) return false;
 
-        ItemStack item1 = ItemStack.builder().itemType(ItemTypes.STONE_PICKAXE).add(Keys.ITEM_LORE, list1).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("WarpMining"))
-                .color(TextColors.GREEN).build())).quantity(1).build();
+                switch (slotIndex) {
+                    case 0: MainInv.commandMenu(pPlayer, "iw warp minage");
+                        break;
+                    case 1: MainInv.commandMenu(pPlayer, "iw warp exploration");
+                        break;
+                    case 2: MainInv.commandMenu(pPlayer, "iw warp end");
+                        break;
+                    case 3: MainInv.commandMenu(pPlayer, "iw warp nether");
+                        break;
+                    case 8: MainInv.closeOpenMenu(pPlayer, MainInv.menuPrincipal(pPlayer));
+                        break;
 
-        // Exploration
-        List<Text> list2 = new ArrayList<Text>();
-        list2.add(Text.of(msgNode.get("WarpExplorationLore")));
-        list2.add(Text.of(msgNode.get("WarpExplorationLore2")));
+                    default:
+                        return false;
+                }
 
-        ItemStack item2 = ItemStack.builder().itemType(ItemTypes.FILLED_MAP).add(Keys.ITEM_LORE, list2).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("WarpExploration"))
-                .color(TextColors.YELLOW).build())).quantity(1).build();
+                if (slotIndex != 8)
+                    MainInv.closeMenu(pPlayer);
 
-        // End
-        List<Text> list3 = new ArrayList<Text>();
-        list3.add(Text.of(msgNode.get("WarpEndLore")));
-        list3.add(Text.of(msgNode.get("WarpEndLore2")));
-
-        ItemStack item3 = ItemStack.builder().itemType(ItemTypes.ENDER_PEARL).add(Keys.ITEM_LORE, list3).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("WarpEnd"))
-                .color(TextColors.DARK_GRAY).build())).quantity(1).build();
-
-        // Nether
-        List<Text> list4 = new ArrayList<Text>();
-        list4.add(Text.of(msgNode.get("WarpNetherLore")));
-        list4.add(Text.of(msgNode.get("WarpNetherLore2")));
-
-        ItemStack item4 = ItemStack.builder().itemType(ItemTypes.NETHER_STAR).add(Keys.ITEM_LORE, list4).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("WarpNether"))
-                .color(TextColors.DARK_RED).build())).quantity(1).build();
-
-        // Menu principal
-        List<Text> list9 = new ArrayList<Text>();
-        list9.add(Text.of(msgNode.get("MainMenuLore")));
-
-        ItemStack item9 = ItemStack.builder().itemType(ItemTypes.GOLD_BLOCK).add(Keys.ITEM_LORE, list9).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("MainMenu"))
-                .color(TextColors.RED).build())).quantity(1).build();
-
-        menu.query(SlotPos.of(0, 0)).set(item1);
-        menu.query(SlotPos.of(1, 0)).set(item2);
-        menu.query(SlotPos.of(2, 0)).set(item3);
-        menu.query(SlotPos.of(3, 0)).set(item4);
-        menu.query(SlotPos.of(8, 1)).set(item9);
+                return false;
+            }
+        });
 
         return menu;
     }

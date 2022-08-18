@@ -25,24 +25,25 @@
 package sponge.util.inventory.trust;
 
 import common.action.IsoworldsAction;
-import org.spongepowered.api.data.key.Keys;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColors;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryArchetypes;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.property.InventoryDimension;
-import org.spongepowered.api.item.inventory.property.InventoryTitle;
-import org.spongepowered.api.item.inventory.property.SlotPos;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.item.inventory.*;
+import org.spongepowered.api.item.inventory.menu.ClickType;
+import org.spongepowered.api.item.inventory.menu.ClickTypes;
+import org.spongepowered.api.item.inventory.menu.InventoryMenu;
+import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
+import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import sponge.util.console.Logger;
 import sponge.util.inventory.MainInv;
 import sponge.util.inventory.trust.sub.TrustAccessInv;
 import sponge.util.inventory.trust.sub.TrustAddInv;
 import sponge.util.inventory.trust.sub.TrustDeleteInv;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,56 +54,74 @@ import static sponge.Main.instance;
 public class TrustInv {
 
     // CONFIANCE
-    public static Inventory getInv(Player pPlayer) {
+    public static InventoryMenu getInv(ServerPlayer pPlayer) {
 
-        Inventory menu = Inventory.builder()
-                .of(InventoryArchetypes.CHEST)
-                .listener(ClickInventoryEvent.class, clickInventoryEvent -> {
-                    // Code event
-                    String menuName = String.valueOf(clickInventoryEvent.getTransactions()
-                            .get(0).getOriginal().get(Keys.DISPLAY_NAME).get().toPlain());
-                    Logger.info("CURSOR 2 " + String.valueOf(clickInventoryEvent.getTransactions().get(0).getOriginal().get(Keys.DISPLAY_NAME).get().toPlain()));
-                    clickInventoryEvent.setCancelled(true);
-                    if (menuName.contains(msgNode.get("TrustAdd"))) {
-                        if (IsoworldsAction.iwExists(pPlayer.getUniqueId().toString())) {
+        ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X1).completeStructure().carrier(pPlayer).build();
+        InventoryMenu menu = inventory.asMenu();
+        menu.setReadOnly(true);
+        menu.setTitle(Component.text("Isoworlds: " + msgNode.get("InvTrust")).color(NamedTextColor.BLUE));
+
+        // Add trust
+        List<Component> list1 = new ArrayList<>();
+        list1.add(Component.text(msgNode.get("TrustAddLore")));
+
+        ItemStack item1 = ItemStack.builder().itemType(ItemTypes.GREEN_WOOL).add(Keys.LORE, list1).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("TrustAdd"))
+                .color(NamedTextColor.GREEN)).quantity(1).build();
+        menu.inventory().set(0, item1);
+
+        // Remove Trust
+        List<Component> list2 = new ArrayList<>();
+        list2.add(Component.text(msgNode.get("TrustRemoveLore")));
+
+        ItemStack item2 = ItemStack.builder().itemType(ItemTypes.RED_WOOL).add(Keys.LORE, list2).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("TrustRemove"))
+                .color(NamedTextColor.RED)).quantity(1).build();
+        menu.inventory().set(1, item2);
+
+        // Trust access
+        List<Component> list3 = new ArrayList<>();
+        list3.add(Component.text(msgNode.get("TrustAccessLore")));
+
+        ItemStack item3 = ItemStack.builder().itemType(ItemTypes.BLUE_WOOL).add(Keys.LORE, list3).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("TrustAccess"))
+                .color(NamedTextColor.BLUE)).quantity(1).build();
+        menu.inventory().set(2, item3);
+
+        // Menu principal
+        List<Component> list9 = new ArrayList<>();
+        list9.add(Component.text(msgNode.get("MainMenuLore")));
+
+        ItemStack item9 = ItemStack.builder().itemType(ItemTypes.GOLD_BLOCK).add(Keys.LORE, list9).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("MainMenu"))
+                .color(NamedTextColor.RED)).quantity(1).build();
+        menu.inventory().set(8, item9);
+
+        menu.registerSlotClick(new SlotClickHandler() {
+            @Override
+            public boolean handle(Cause cause, Container container, Slot slot, int slotIndex, ClickType<?> clickType) {
+                if(clickType != ClickTypes.CLICK_LEFT.get() && clickType != ClickTypes.CLICK_RIGHT.get()) return false;
+
+                switch (slotIndex) {
+                    case 0:
+                        if (IsoworldsAction.iwExists(pPlayer.uniqueId().toString()))
                             MainInv.closeOpenMenu(pPlayer, TrustAddInv.getInv(pPlayer));
-                        }
-                    } else if (menuName.contains(msgNode.get("TrustRemove"))) {
-                        if (IsoworldsAction.iwExists(pPlayer.getUniqueId().toString())) {
+                        break;
+                    case 1:
+                        if (IsoworldsAction.iwExists(pPlayer.uniqueId().toString()))
                             MainInv.closeOpenMenu(pPlayer, TrustDeleteInv.getInv(pPlayer));
-                        }
-                    } else if (menuName.contains(msgNode.get("TrustAccess"))) {
-                        MainInv.closeOpenMenu(pPlayer, TrustAccessInv.getInv(pPlayer));
-                    } else if (menuName.contains(msgNode.get("MainMenu"))) {
-                        MainInv.closeOpenMenu(pPlayer, MainInv.menuPrincipal(pPlayer));
-                    }
-                })
-                .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of(Text.builder("Isoworlds: " + msgNode.get("InvTrust")).color(TextColors.BLUE).build())))
-                .property(InventoryDimension.PROPERTY_NAME, InventoryDimension.of(9, 1))
-                .build(instance);
+                        break;
+                    case 2: MainInv.closeOpenMenu(pPlayer, TrustAccessInv.getInv(pPlayer));
+                        break;
+                    case 8: MainInv.closeOpenMenu(pPlayer, MainInv.menuPrincipal(pPlayer));
+                        break;
 
-        List<Text> list1 = new ArrayList<Text>();
-        list1.add(Text.of(msgNode.get("TrustAddLore")));
-        List<Text> list2 = new ArrayList<Text>();
-        list2.add(Text.of(msgNode.get("TrustRemoveLore")));
-        List<Text> list3 = new ArrayList<Text>();
-        list3.add(Text.of(msgNode.get("TrustAccessLore")));
-        List<Text> list4 = new ArrayList<Text>();
-        list4.add(Text.of(msgNode.get("MainMenuLore")));
+                    default:
+                        return false;
+                }
 
-        ItemStack item1 = ItemStack.builder().itemType(ItemTypes.WOOL).add(Keys.DYE_COLOR, DyeColors.GREEN).add(Keys.ITEM_LORE, list1).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("TrustAdd"))
-                .color(TextColors.GREEN).build())).quantity(1).build();
-        ItemStack item2 = ItemStack.builder().itemType(ItemTypes.WOOL).add(Keys.DYE_COLOR, DyeColors.RED).add(Keys.ITEM_LORE, list2).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("TrustRemove"))
-                .color(TextColors.RED).build())).quantity(1).build();
-        ItemStack item3 = ItemStack.builder().itemType(ItemTypes.WOOL).add(Keys.DYE_COLOR, DyeColors.ORANGE).add(Keys.ITEM_LORE, list3).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("TrustAccess"))
-                .color(TextColors.RED).build())).quantity(1).build();
-        ItemStack item4 = ItemStack.builder().itemType(ItemTypes.GOLD_BLOCK).add(Keys.ITEM_LORE, list4).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("MainMenu"))
-                .color(TextColors.RED).build())).quantity(1).build();
+                if (slotIndex != 8)
+                    MainInv.closeMenu(pPlayer);
 
-        menu.query(SlotPos.of(0, 0)).set(item1);
-        menu.query(SlotPos.of(1, 0)).set(item2);
-        menu.query(SlotPos.of(2, 0)).set(item3);
-        menu.query(SlotPos.of(8, 0)).set(item4);
+                return false;
+            }
+        });
 
         return menu;
     }

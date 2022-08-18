@@ -24,19 +24,18 @@
  */
 package sponge.util.inventory.time;
 
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.type.DyeColors;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryArchetypes;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.property.InventoryDimension;
-import org.spongepowered.api.item.inventory.property.InventoryTitle;
-import org.spongepowered.api.item.inventory.property.SlotPos;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.item.inventory.*;
+import org.spongepowered.api.item.inventory.menu.ClickType;
+import org.spongepowered.api.item.inventory.menu.ClickTypes;
+import org.spongepowered.api.item.inventory.menu.InventoryMenu;
+import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
+import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import sponge.util.inventory.MainInv;
 
 import java.util.ArrayList;
@@ -47,45 +46,63 @@ import static sponge.Main.instance;
 
 public class TimeInv {
 
-    public static Inventory getInv(Player pPlayer) {
+    public static InventoryMenu getInv(ServerPlayer pPlayer) {
 
-        Inventory menu = Inventory.builder()
-                .of(InventoryArchetypes.CHEST)
-                .listener(ClickInventoryEvent.class, clickInventoryEvent -> {
-                    // Code event
-                    String menuName = String.valueOf(clickInventoryEvent.getTransactions()
-                            .get(0).getOriginal().get(Keys.DISPLAY_NAME).get().toPlain());
-                    clickInventoryEvent.setCancelled(true);
-                    if (menuName.contains(msgNode.get("TimeDay"))) {
+        ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X1).completeStructure().carrier(pPlayer).build();
+        InventoryMenu menu = inventory.asMenu();
+        menu.setReadOnly(true);
+        menu.setTitle(Component.text("Isoworlds: " + msgNode.get("InvTime")).color(NamedTextColor.BLUE));
+
+        // Day
+        List<Component> list1 = new ArrayList<>();
+        list1.add(Component.text(msgNode.get("TimeDayLore")));
+
+        ItemStack item1 = ItemStack.builder().itemType(ItemTypes.WHITE_WOOL).add(Keys.LORE, list1).add(Keys.DISPLAY_NAME, Component.text("Jour")
+                .color(NamedTextColor.YELLOW)).quantity(1).build();
+        menu.inventory().set(0, item1);
+
+        // Night
+        List<Component> list2 = new ArrayList<>();
+        list2.add(Component.text(msgNode.get("TimeNightLore")));
+
+        ItemStack item2 = ItemStack.builder().itemType(ItemTypes.BLACK_WOOL).add(Keys.LORE, list2).add(Keys.DISPLAY_NAME, Component.text("Nuit")
+                .color(NamedTextColor.BLUE)).quantity(1).build();
+        menu.inventory().set(1, item2);
+
+        // Menu principal
+        List<Component> list9 = new ArrayList<>();
+        list9.add(Component.text(msgNode.get("MainMenuLore")));
+
+        ItemStack item9 = ItemStack.builder().itemType(ItemTypes.GOLD_BLOCK).add(Keys.LORE, list9).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("MainMenu"))
+                .color(NamedTextColor.RED)).quantity(1).build();
+        menu.inventory().set(8, item9);
+
+        menu.registerSlotClick(new SlotClickHandler() {
+            @Override
+            public boolean handle(Cause cause, Container container, Slot slot, int slotIndex, ClickType<?> clickType) {
+                if (clickType != ClickTypes.CLICK_LEFT.get() && clickType != ClickTypes.CLICK_RIGHT.get()) return false;
+
+                switch (slotIndex) {
+                    case 0:
                         MainInv.commandMenu(pPlayer, "iw temps jour");
-                        MainInv.closeMenu(pPlayer);
-                    } else if (menuName.contains(msgNode.get("TimeNight"))) {
+                        break;
+                    case 1:
                         MainInv.commandMenu(pPlayer, "iw temps nuit");
-                        MainInv.closeMenu(pPlayer);
-                    } else if (menuName.contains(msgNode.get("MainMenu"))) {
+                        break;
+                    case 8:
                         MainInv.closeOpenMenu(pPlayer, MainInv.menuPrincipal(pPlayer));
-                    }
-                })
-                .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of(Text.builder("Isoworlds: " + msgNode.get("InvTime")).color(TextColors.BLUE).build())))
-                .property(InventoryDimension.PROPERTY_NAME, InventoryDimension.of(9, 1))
-                .build(instance);
+                        break;
 
-        List<Text> list1 = new ArrayList<Text>();
-        list1.add(Text.of(msgNode.get("TimeDayLore")));
-        List<Text> list2 = new ArrayList<Text>();
-        list2.add(Text.of(msgNode.get("TimeNightLore")));
-        List<Text> list3 = new ArrayList<Text>();
-        list3.add(Text.of(msgNode.get("MainMenuLore")));
+                    default:
+                        return false;
+                }
 
-        ItemStack item1 = ItemStack.builder().itemType(ItemTypes.WOOL).add(Keys.DYE_COLOR, DyeColors.WHITE).add(Keys.ITEM_LORE, list1).add(Keys.DISPLAY_NAME, Text.of(Text.builder("Jour")
-                .color(TextColors.YELLOW).build())).quantity(1).build();
-        ItemStack item2 = ItemStack.builder().itemType(ItemTypes.WOOL).add(Keys.DYE_COLOR, DyeColors.BLACK).add(Keys.ITEM_LORE, list2).add(Keys.DISPLAY_NAME, Text.of(Text.builder("Nuit")
-                .color(TextColors.BLUE).build())).quantity(1).build();
-        ItemStack item3 = ItemStack.builder().itemType(ItemTypes.GOLD_BLOCK).add(Keys.ITEM_LORE, list3).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("MainMenu"))
-                .color(TextColors.RED).build())).quantity(1).build();
-        menu.query(SlotPos.of(0, 0)).set(item1);
-        menu.query(SlotPos.of(1, 0)).set(item2);
-        menu.query(SlotPos.of(8, 0)).set(item3);
+                if (slotIndex != 8)
+                    MainInv.closeMenu(pPlayer);
+
+                return false;
+            }
+        });
 
         return menu;
     }

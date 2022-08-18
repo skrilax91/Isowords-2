@@ -25,24 +25,21 @@
 package sponge.util.inventory.trust.sub;
 
 import common.action.TrustAction;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
-import org.spongepowered.api.data.manipulator.mutable.SkullData;
-import org.spongepowered.api.data.type.SkullTypes;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryArchetypes;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.property.InventoryDimension;
-import org.spongepowered.api.item.inventory.property.InventoryTitle;
-import org.spongepowered.api.item.inventory.property.SlotPos;
+import org.spongepowered.api.item.inventory.*;
+import org.spongepowered.api.item.inventory.menu.ClickType;
+import org.spongepowered.api.item.inventory.menu.ClickTypes;
+import org.spongepowered.api.item.inventory.menu.InventoryMenu;
+import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
+import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 import sponge.util.action.StatAction;
 import sponge.util.console.Logger;
 import sponge.util.inventory.MainInv;
@@ -55,93 +52,74 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static common.Msg.msgNode;
-import static sponge.Main.instance;
 
 public class TrustAddInv {
 
-        public static Inventory getInv(Player pPlayer) {
+    public static InventoryMenu getInv(ServerPlayer pPlayer) {
 
-            Inventory menu = Inventory.builder()
-                    .of(InventoryArchetypes.CHEST)
-                    .listener(ClickInventoryEvent.class, clickInventoryEvent -> {
-                        // Code event
-                        String menuName = String.valueOf(clickInventoryEvent.getTransactions()
-                                .get(0).getOriginal().get(Keys.ITEM_LORE).get().toString());
-                        String menuPlayer = String.valueOf(clickInventoryEvent.getTransactions()
-                                .get(0).getOriginal().get(Keys.DISPLAY_NAME).get().toPlain());
-                        Logger.info("CURSOR 2 " + String.valueOf(clickInventoryEvent.getTransactions().get(0).getOriginal().get(Keys.DISPLAY_NAME).get().toPlain()));
-                        clickInventoryEvent.setCancelled(true);
-                        // Si joueur, on ajouter le joueur
-                        if (menuName.contains(msgNode.get("Player"))) {
-                            MainInv.commandMenu(pPlayer, "iw confiance " + menuPlayer);
-                            MainInv.closeOpenMenu(pPlayer, MainInv.menuPrincipal(pPlayer));
-                        } else if (menuName.contains(msgNode.get("MainMenuLore"))) {
-                            MainInv.closeOpenMenu(pPlayer, MainInv.menuPrincipal(pPlayer));
-                        }
-                    })
-                    .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of(Text.builder("Isoworlds: > " + msgNode.get("TrustAdd")).color(TextColors.BLUE).build())))
-                    .property(InventoryDimension.PROPERTY_NAME, InventoryDimension.of(9, 4))
-                    .build(instance);
+        ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X4).completeStructure().carrier(pPlayer).build();
+        InventoryMenu menu = inventory.asMenu();
+        menu.setReadOnly(true);
+        menu.setTitle(Component.text("Isoworlds: > " + msgNode.get("TrustAdd")).color(NamedTextColor.BLUE));
 
-            int i = 0;
-            int j = 0;
-            ResultSet trusts = TrustAction.getTrusts(pPlayer.getUniqueId().toString());
-            List<String> players = new ArrayList<String>();
+        // Menu principal
+        List<Component> list9 = new ArrayList<>();
+        list9.add(Component.text(msgNode.get("MainMenuLore")));
 
-            // Récupération joueurs trust dans un tableau
-            try {
-                while (trusts.next()) {
-                    String tmp = trusts.getString(1);
-                    Logger.info("name = " + tmp);
-                    UUID uuid = UUID.fromString(tmp);
-                    Logger.info("uuid = " + uuid);
-                    Optional<User> user = StatAction.getPlayerFromUUID(uuid);
-                    players.add(user.get().getName());
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
+        ItemStack item9 = ItemStack.builder().itemType(ItemTypes.GOLD_BLOCK).add(Keys.LORE, list9).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("MainMenu"))
+                .color(NamedTextColor.RED)).quantity(1).build();
+        menu.inventory().set(35, item9);
+
+        ResultSet trusts = TrustAction.getTrusts(pPlayer.uniqueId().toString());
+        List<String> players = new ArrayList<>();
+
+        try {
+            while (trusts.next()) {
+                String tmp = trusts.getString(1);
+                Logger.info("name = " + tmp);
+                UUID uuid = UUID.fromString(tmp);
+                Logger.info("uuid = " + uuid);
+                Optional<User> user = StatAction.getPlayerFromUUID(uuid);
+                players.add(user.get().name());
             }
-
-            // Boucle des joueurs en ligne, si dans tableau on continue
-            for (Player p : Sponge.getServer().getOnlinePlayers()) {
-                if (players.contains(p.getName())) {
-                    continue;
-                }
-
-                // Dont show own access
-                if (p.getName().equals(pPlayer.getName())) {
-                    continue;
-                }
-
-                // Construction du lore
-                List<Text> list1 = new ArrayList<Text>();
-                list1.add(Text.of(msgNode.get("Player")));
-
-                // Construction des skin itemstack
-                SkullData data = Sponge.getGame().getDataManager().getManipulatorBuilder(SkullData.class).get().create();
-                data.set(Keys.SKULL_TYPE, SkullTypes.PLAYER);
-                ItemStack stack = Sponge.getGame().getRegistry().createBuilder(ItemStack.Builder.class).itemType(ItemTypes.SKULL).itemData(data)
-                        .add(Keys.ITEM_LORE, list1).add(Keys.DISPLAY_NAME, Text.of(Text.builder(p.getName())
-                                .color(TextColors.GOLD).build())).quantity(1)
-                        .build();
-                RepresentedPlayerData skinData = Sponge.getGame().getDataManager().getManipulatorBuilder(RepresentedPlayerData.class).get().create();
-                skinData.set(Keys.REPRESENTED_PLAYER, GameProfile.of(p.getUniqueId(), p.getName()));
-                stack.offer(skinData);
-
-                if (i >= 8) {
-                    j = j++;
-                }
-                menu.query(SlotPos.of(i, j)).set(stack);
-                i++;
-            }
-
-            List<Text> list2 = new ArrayList<Text>();
-            list2.add(Text.of(msgNode.get("MainMenuLore")));
-
-            ItemStack item2 = ItemStack.builder().itemType(ItemTypes.GOLD_BLOCK).add(Keys.ITEM_LORE, list2).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("MainMenu"))
-                    .color(TextColors.RED).build())).quantity(1).build();
-            menu.query(SlotPos.of(8, 3)).set(item2);
-
-            return menu;
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+
+        int i = 0;
+        for (ServerPlayer p : Sponge.server().onlinePlayers()) {
+            if (players.contains(p.name()) || p.name().equals(pPlayer.name()))
+                continue;
+
+            // Construction du lore
+            List<Component> list1 = new ArrayList<>();
+            list1.add(Component.text(msgNode.get("Player")));
+
+            ItemStack item1 = ItemStack.builder().itemType(ItemTypes.PLAYER_HEAD).add(Keys.LORE, list1).add(Keys.DISPLAY_NAME, Component.text(p.name())
+                    .color(NamedTextColor.GOLD)).quantity(1).build();
+            menu.inventory().set(i, item1);
+            i++;
+        }
+
+        menu.registerSlotClick(new SlotClickHandler() {
+            @Override
+            public boolean handle(Cause cause, Container container, Slot slot, int slotIndex, ClickType<?> clickType) {
+                if(clickType != ClickTypes.CLICK_LEFT.get() && clickType != ClickTypes.CLICK_RIGHT.get()) return false;
+
+                if (slotIndex == 35) {
+                    MainInv.closeOpenMenu(pPlayer, MainInv.menuPrincipal(pPlayer));
+                    return false;
+                }
+
+                if (slot.totalQuantity() != 0) {
+                    MainInv.commandMenu(pPlayer, "iw confiance " + slot.get(Keys.DISPLAY_NAME).get());
+                    MainInv.closeOpenMenu(pPlayer, MainInv.menuPrincipal(pPlayer));
+                }
+
+                return false;
+            }
+        });
+
+        return menu;
+    }
 }

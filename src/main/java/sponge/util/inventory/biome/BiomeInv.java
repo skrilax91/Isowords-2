@@ -24,148 +24,149 @@
  */
 package sponge.util.inventory.biome;
 
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.type.DyeColors;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryArchetypes;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.property.InventoryDimension;
-import org.spongepowered.api.item.inventory.property.InventoryTitle;
-import org.spongepowered.api.item.inventory.property.SlotPos;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.item.inventory.*;
+import org.spongepowered.api.item.inventory.menu.ClickType;
+import org.spongepowered.api.item.inventory.menu.ClickTypes;
+import org.spongepowered.api.item.inventory.menu.InventoryMenu;
+import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
+import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import sponge.util.inventory.MainInv;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static common.Msg.msgNode;
-import static sponge.Main.instance;
 
 public class BiomeInv {
 
     // BIOME
-    public static Inventory getInv(Player pPlayer) {
+    public static InventoryMenu getInv(ServerPlayer pPlayer) {
 
-        Inventory menu = Inventory.builder()
-                .of(InventoryArchetypes.CHEST)
-                .listener(ClickInventoryEvent.class, clickInventoryEvent -> {
-                    // Code event
-                    String menuName = String.valueOf(clickInventoryEvent.getTransactions()
-                            .get(0).getOriginal().get(Keys.DISPLAY_NAME).get().toPlain());
-                    clickInventoryEvent.setCancelled(true);
-                    if (menuName.contains(msgNode.get("BiomePlain"))) {
-                        MainInv.commandMenu(pPlayer, "iw biome plaines");
-                        MainInv.closeMenu(pPlayer);
-                    } else if (menuName.contains(msgNode.get("BiomeDesert"))) {
-                        MainInv.commandMenu(pPlayer, "iw biome desert");
-                        MainInv.closeMenu(pPlayer);
-                    } else if (menuName.contains(msgNode.get("BiomeSwamp"))) {
-                        MainInv.commandMenu(pPlayer, "iw biome marais");
-                        MainInv.closeMenu(pPlayer);
-                    } else if (menuName.contains(msgNode.get("BiomeOcean"))) {
-                        MainInv.commandMenu(pPlayer, "iw biome océan");
-                        MainInv.closeMenu(pPlayer);
-                    } else if (menuName.contains(msgNode.get("BiomeMushroom"))) {
-                        MainInv.commandMenu(pPlayer, "iw biome champignon");
-                        MainInv.closeMenu(pPlayer);
-                    } else if (menuName.contains(msgNode.get("BiomeJungle"))) {
-                        MainInv.commandMenu(pPlayer, "iw biome jungle");
-                        MainInv.closeMenu(pPlayer);
-                    } else if (menuName.contains(msgNode.get("BiomeHell"))) {
-                        MainInv.commandMenu(pPlayer, "iw biome enfer");
-                        MainInv.closeMenu(pPlayer);
-                    } else if (menuName.contains(msgNode.get("BiomeEnd"))) {
-                        MainInv.commandMenu(pPlayer, "iw biome end");
-                        MainInv.closeMenu(pPlayer);
-                    } else if (menuName.contains(msgNode.get("MainMenu"))) {
-                        MainInv.closeOpenMenu(pPlayer, MainInv.menuPrincipal(pPlayer));
-                    }
-                })
-                .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of(Text.builder("Isoworlds: Biome").color(TextColors.BLUE).build())))
-                .property(InventoryDimension.PROPERTY_NAME, InventoryDimension.of(9, 2))
-                .build(instance);
+        ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X2).completeStructure().carrier(pPlayer).build();
+        InventoryMenu menu = inventory.asMenu();
+        menu.setReadOnly(true);
+        menu.setTitle(Component.text("Isoworlds: Biome"));
 
         // Plaines
-        List<Text> list1 = new ArrayList<Text>();
-        list1.add(Text.of(msgNode.get("BiomePlainLore")));
-        list1.add(Text.of(msgNode.get("BiomePlainLore2")));
+        List<Component> list1 = new ArrayList<>();
+        list1.add(Component.text(msgNode.get("BiomePlainLore")));
+        list1.add(Component.text(msgNode.get("BiomePlainLore2")));
 
-        ItemStack item1 = ItemStack.builder().itemType(ItemTypes.GRASS).add(Keys.ITEM_LORE, list1).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("BiomePlain"))
-                .color(TextColors.GREEN).build())).quantity(1).build();
+        ItemStack item1 = ItemStack.builder().itemType(ItemTypes.GRASS).add(Keys.LORE, list1).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("BiomePlain"))
+                .color(NamedTextColor.GREEN)).quantity(1).build();
+        menu.inventory().set(0, item1);
 
         // Désert
-        List<Text> list2 = new ArrayList<Text>();
-        list2.add(Text.of(msgNode.get("BiomeDesertLore")));
-        list2.add(Text.of(msgNode.get("BiomeDesertLore2")));
+        List<Component> list2 = new ArrayList<>();
+        list2.add(Component.text(msgNode.get("BiomeDesertLore")));
+        list2.add(Component.text(msgNode.get("BiomeDesertLore2")));
 
-        ItemStack item2 = ItemStack.builder().itemType(ItemTypes.SAND).add(Keys.ITEM_LORE, list2).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("BiomeDesert"))
-                .color(TextColors.YELLOW).build())).quantity(1).build();
+        ItemStack item2 = ItemStack.builder().itemType(ItemTypes.SAND).add(Keys.LORE, list2).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("BiomeDesert"))
+                .color(NamedTextColor.YELLOW)).quantity(1).build();
+        menu.inventory().set(1, item2);
 
         // Marais
-        List<Text> list3 = new ArrayList<Text>();
-        list3.add(Text.of(msgNode.get("BiomeSwampLore")));
-        list3.add(Text.of(msgNode.get("BiomeSwampLore2")));
+        List<Component> list3 = new ArrayList<>();
+        list3.add(Component.text(msgNode.get("BiomeSwampLore")));
+        list3.add(Component.text(msgNode.get("BiomeSwampLore2")));
 
-        ItemStack item3 = ItemStack.builder().itemType(ItemTypes.CLAY).add(Keys.ITEM_LORE, list3).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("BiomeSwamp"))
-                .color(TextColors.GRAY).build())).quantity(1).build();
+        ItemStack item3 = ItemStack.builder().itemType(ItemTypes.CLAY).add(Keys.LORE, list3).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("BiomeSwamp"))
+                .color(NamedTextColor.GRAY)).quantity(1).build();
+        menu.inventory().set(2, item3);
 
         // Océan
-        List<Text> list4 = new ArrayList<Text>();
-        list4.add(Text.of(msgNode.get("BiomeOceanLore")));
+        List<Component> list4 = new ArrayList<>();
+        list4.add(Component.text(msgNode.get("BiomeOceanLore")));
 
-        ItemStack item4 = ItemStack.builder().itemType(ItemTypes.WOOL).add(Keys.DYE_COLOR, DyeColors.BLUE).add(Keys.ITEM_LORE, list4).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("BiomeOcean"))
-                .color(TextColors.BLUE).build())).quantity(1).build();
+        ItemStack item4 = ItemStack.builder().itemType(ItemTypes.BLUE_WOOL).add(Keys.LORE, list4).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("BiomeOcean"))
+                .color(NamedTextColor.BLUE)).quantity(1).build();
+        menu.inventory().set(3, item4);
 
         // Champignon
-        List<Text> list5 = new ArrayList<Text>();
-        list5.add(Text.of(msgNode.get("BiomeMushroomLore")));
-        list5.add(Text.of(msgNode.get("BiomeMushroomLore2")));
+        List<Component> list5 = new ArrayList<>();
+        list5.add(Component.text(msgNode.get("BiomeMushroomLore")));
+        list5.add(Component.text(msgNode.get("BiomeMushroomLore2")));
 
-        ItemStack item5 = ItemStack.builder().itemType(ItemTypes.RED_MUSHROOM).add(Keys.ITEM_LORE, list5).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("BiomeMushroom"))
-                .color(TextColors.RED).build())).quantity(1).build();
+        ItemStack item5 = ItemStack.builder().itemType(ItemTypes.RED_MUSHROOM).add(Keys.LORE, list5).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("BiomeMushroom"))
+                .color(NamedTextColor.RED)).quantity(1).build();
+        menu.inventory().set(4, item5);
 
         // Jungle
-        List<Text> list6 = new ArrayList<Text>();
-        list6.add(Text.of(msgNode.get("BiomeJungleLore")));
-        list6.add(Text.of(msgNode.get("BiomeJungleLore2")));
+        List<Component> list6 = new ArrayList<>();
+        list6.add(Component.text(msgNode.get("BiomeJungleLore")));
+        list6.add(Component.text(msgNode.get("BiomeJungleLore2")));
 
-        ItemStack item6 = ItemStack.builder().itemType(ItemTypes.SAPLING).add(Keys.ITEM_LORE, list6).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("BiomeJungle"))
-                .color(TextColors.DARK_GREEN).build())).quantity(1).build();
+        ItemStack item6 = ItemStack.builder().itemType(ItemTypes.JUNGLE_SAPLING).add(Keys.LORE, list6).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("BiomeJungle"))
+                .color(NamedTextColor.DARK_GREEN)).quantity(1).build();
+        menu.inventory().set(5, item6);
 
         // Enfer
-        List<Text> list7 = new ArrayList<Text>();
-        list7.add(Text.of(msgNode.get("BiomeHellLore")));
+        List<Component> list7 = new ArrayList<>();
+        list7.add(Component.text(msgNode.get("BiomeHellLore")));
 
-        ItemStack item7 = ItemStack.builder().itemType(ItemTypes.NETHERRACK).add(Keys.ITEM_LORE, list7).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("BiomeHell"))
-                .color(TextColors.DARK_RED).build())).quantity(1).build();
+        ItemStack item7 = ItemStack.builder().itemType(ItemTypes.NETHERRACK).add(Keys.LORE, list7).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("BiomeHell"))
+                .color(NamedTextColor.DARK_RED)).quantity(1).build();
+        menu.inventory().set(6, item7);
 
         // End
-        List<Text> list8 = new ArrayList<Text>();
-        list8.add(Text.of(msgNode.get("BiomeEndLore")));
+        List<Component> list8 = new ArrayList<>();
+        list8.add(Component.text(msgNode.get("BiomeEndLore")));
 
-        ItemStack item8 = ItemStack.builder().itemType(ItemTypes.END_STONE).add(Keys.ITEM_LORE, list8).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("BiomeEnd"))
-                .color(TextColors.DARK_PURPLE).build())).quantity(1).build();
+        ItemStack item8 = ItemStack.builder().itemType(ItemTypes.END_STONE).add(Keys.LORE, list8).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("BiomeEnd"))
+                .color(NamedTextColor.DARK_PURPLE)).quantity(1).build();
+        menu.inventory().set(7, item8);
 
         // Menu principal
-        List<Text> list9 = new ArrayList<Text>();
-        list9.add(Text.of(msgNode.get("MainMenuLore")));
+        List<Component> list9 = new ArrayList<>();
+        list9.add(Component.text(msgNode.get("MainMenuLore")));
 
-        ItemStack item9 = ItemStack.builder().itemType(ItemTypes.GOLD_BLOCK).add(Keys.ITEM_LORE, list9).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("MainMenu"))
-                .color(TextColors.RED).build())).quantity(1).build();
+        ItemStack item9 = ItemStack.builder().itemType(ItemTypes.GOLD_BLOCK).add(Keys.LORE, list9).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("MainMenu"))
+                .color(NamedTextColor.RED)).quantity(1).build();
+        menu.inventory().set(8, item9);
 
-        menu.query(SlotPos.of(0, 0)).set(item1);
-        menu.query(SlotPos.of(1, 0)).set(item2);
-        menu.query(SlotPos.of(2, 0)).set(item3);
-        menu.query(SlotPos.of(3, 0)).set(item4);
-        menu.query(SlotPos.of(4, 0)).set(item5);
-        menu.query(SlotPos.of(5, 0)).set(item6);
-        menu.query(SlotPos.of(6, 0)).set(item7);
-        menu.query(SlotPos.of(7, 0)).set(item8);
-        menu.query(SlotPos.of(8, 1)).set(item9);
+
+
+        menu.registerSlotClick(new SlotClickHandler() {
+            @Override
+            public boolean handle(Cause cause, Container container, Slot slot, int slotIndex, ClickType<?> clickType) {
+                if(clickType != ClickTypes.CLICK_LEFT.get() && clickType != ClickTypes.CLICK_RIGHT.get()) return false;
+
+                switch (slotIndex) {
+                    case 0: MainInv.commandMenu(pPlayer, "iw biome plaines");
+                        break;
+                    case 1: MainInv.commandMenu(pPlayer, "iw biome desert");
+                        break;
+                    case 2: MainInv.commandMenu(pPlayer, "iw biome marais");
+                        break;
+                    case 3: MainInv.commandMenu(pPlayer, "iw biome océan");
+                        break;
+                    case 4: MainInv.commandMenu(pPlayer, "iw biome champignon");
+                        break;
+                    case 5: MainInv.commandMenu(pPlayer, "iw biome jungle");
+                        break;
+                    case 6: MainInv.commandMenu(pPlayer, "iw biome enfer");
+                        break;
+                    case 7: MainInv.commandMenu(pPlayer, "iw biome end");
+                        break;
+                    case 8: MainInv.closeOpenMenu(pPlayer, MainInv.menuPrincipal(pPlayer));
+                        break;
+
+                        default:
+                            return false;
+                }
+
+                if (slotIndex != 8)
+                    MainInv.closeMenu(pPlayer);
+
+                return false;
+            }
+        });
 
         return menu;
     }

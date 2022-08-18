@@ -24,49 +24,40 @@
  */
 package sponge.util.console;
 
-
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.title.Title;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.spongepowered.api.adventure.Audiences;
 import sponge.Main;
 
 public class Logger {
     private static final Main instance = Main.instance;
 
+    private static void sendLog(String s, NamedTextColor color) {
+        Audiences.system().sendMessage(
+                Component.text("[").color(NamedTextColor.WHITE).append(
+                        Component.text("IW").color(NamedTextColor.GOLD).append(
+                                Component.text("]").color(NamedTextColor.WHITE).append(
+                                        Component.text(s).color(color)
+                                )
+                        )
+                )
+        );
+    }
+
     public static void info(String s) {
-        instance.getGame().getServer().getConsole().sendMessage(Text.of(Text.builder("[").color(TextColors.WHITE)
-                .append(Text.of(Text.builder("IW").color(TextColors.GOLD)
-                        .append(Text.of(Text.builder("] ").color(TextColors.WHITE)
-                                .append(Text.builder(s).color(TextColors.GREEN).build())))))));
+        sendLog(s, NamedTextColor.GREEN);
     }
 
     public static void warning(String s) {
-        instance.getGame().getServer().getConsole().sendMessage(Text.of(Text.builder("[").color(TextColors.WHITE)
-                .append(Text.of(Text.builder("IW").color(TextColors.GOLD)
-                        .append(Text.of(Text.builder("] ").color(TextColors.WHITE)
-                                .append(Text.builder(s).color(TextColors.GOLD).build())))))));
+        sendLog(s, NamedTextColor.GOLD);
     }
 
     public static void severe(String s) {
-        instance.getGame().getServer().getConsole().sendMessage(Text.of(Text.builder("[").color(TextColors.WHITE)
-                .append(Text.of(Text.builder("IW").color(TextColors.GOLD)
-                        .append(Text.of(Text.builder("] ").color(TextColors.WHITE)
-                                .append(Text.builder(s).color(TextColors.RED).build())))))));
+        sendLog(s, NamedTextColor.RED);
     }
 
     public static void tracking(String s) {
-        instance.getGame().getServer().getConsole().sendMessage(Text.of(Text.builder("[").color(TextColors.WHITE)
-                .append(Text.of(Text.builder("IW").color(TextColors.GOLD)
-                        .append(Text.of(Text.builder("] ").color(TextColors.WHITE)
-                                .append(Text.builder(s).color(TextColors.AQUA).build())))))));
-    }
-
-    // Tiltle with SubTitle
-    public static Title titleSubtitle(String title, String subtitle) {
-        Text Titre = Text.of(Text.builder(title).color(TextColors.GOLD).build());
-        Text SousTitre = Text.of(Text.builder(subtitle).color(TextColors.AQUA).build());
-        Title ready = (Title) Title.of(Titre, SousTitre);
-        return ready;
+        sendLog(s, NamedTextColor.AQUA);
     }
 
     public static void tag() {

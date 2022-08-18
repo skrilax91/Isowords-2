@@ -24,19 +24,19 @@
  */
 package sponge.util.inventory.weather;
 
-import org.spongepowered.api.data.key.Keys;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColors;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryArchetypes;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.property.InventoryDimension;
-import org.spongepowered.api.item.inventory.property.InventoryTitle;
-import org.spongepowered.api.item.inventory.property.SlotPos;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.item.inventory.*;
+import org.spongepowered.api.item.inventory.menu.ClickType;
+import org.spongepowered.api.item.inventory.menu.ClickTypes;
+import org.spongepowered.api.item.inventory.menu.InventoryMenu;
+import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
+import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import sponge.util.inventory.MainInv;
 
 import java.util.ArrayList;
@@ -47,91 +47,71 @@ import static sponge.Main.instance;
 
 public class WeatherInv {
 
-    public static Inventory getInv(Player pPlayer) {
+    public static InventoryMenu getInv(ServerPlayer pPlayer) {
 
-        Inventory menu = Inventory.builder()
-                .of(InventoryArchetypes.CHEST)
-                .listener(ClickInventoryEvent.class, clickInventoryEvent -> {
-                    // Code event
-                    String menuName = String.valueOf(clickInventoryEvent.getTransactions()
-                            .get(0).getOriginal().get(Keys.DISPLAY_NAME).get().toPlain());
-                    String mtype = "";
-
-                    clickInventoryEvent.setCancelled(true);
-                    if (menuName.contains(msgNode.get("WeatherSun"))) {
-                        mtype = "soleil";
-                    } else if (menuName.contains(msgNode.get("WeatherRain"))) {
-                        mtype = "pluie";
-                    } else if (menuName.contains(msgNode.get("WeatherStorm"))) {
-                        mtype = "storm";
-                    } else if (menuName.contains(msgNode.get("MainMenu"))) {
-                        MainInv.closeOpenMenu(pPlayer, MainInv.menuPrincipal(pPlayer));
-                    }
-
-                    if (menuName.contains(msgNode.get("Weather10min"))) {
-                        // Check if charge higher than 0
-                        MainInv.commandMenu(pPlayer, "iw meteo " + mtype + " 12000 " + pPlayer.getUniqueId().toString() + "-Isoworld");
-                        MainInv.closeMenu(pPlayer);
-                    } else if (menuName.contains(msgNode.get("Weather30min"))) {
-                        MainInv.commandMenu(pPlayer, "iw meteo " + mtype + " 36000 " + pPlayer.getUniqueId().toString() + "-Isoworld");
-                        MainInv.closeMenu(pPlayer);
-                    } else if (menuName.contains(msgNode.get("Weather1hour"))) {
-                        MainInv.commandMenu(pPlayer, "iw meteo " + mtype + " 72000 " + pPlayer.getUniqueId().toString() + "-Isoworld");
-                        MainInv.closeMenu(pPlayer);
-                    }
-
-                })
-                .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of(Text.builder("Isoworlds: " + msgNode.get("InvWeather")).color(TextColors.BLUE).build())))
-                .property(InventoryDimension.PROPERTY_NAME, InventoryDimension.of(9, 3))
-                .build(instance);
-
-        List<Text> list1 = new ArrayList<Text>();
-        list1.add(Text.of(msgNode.get("WeatherSunLore")));
-
-        List<Text> list2 = new ArrayList<Text>();
-        list2.add(Text.of(msgNode.get("WeatherRainLore")));
-
-        List<Text> list3 = new ArrayList<Text>();
-        list3.add(Text.of(msgNode.get("WeatherStormLore")));
-
-        List<Text> list4 = new ArrayList<Text>();
-        list4.add(Text.of(msgNode.get("MainMenuLore")));
+        ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X1).completeStructure().carrier(pPlayer).build();
+        InventoryMenu menu = inventory.asMenu();
+        menu.setReadOnly(true);
+        menu.setTitle(Component.text("Isoworlds: " + msgNode.get("InvWeather")).color(NamedTextColor.BLUE));
 
 
-        ItemStack item1 = ItemStack.builder().itemType(ItemTypes.WOOL).add(Keys.DYE_COLOR, DyeColors.YELLOW).add(Keys.ITEM_LORE, list1).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("WeatherSun") + " " + msgNode.get("Weather10min"))
-                .color(TextColors.YELLOW).build())).quantity(1).build();
-        ItemStack item2 = ItemStack.builder().itemType(ItemTypes.WOOL).add(Keys.DYE_COLOR, DyeColors.YELLOW).add(Keys.ITEM_LORE, list1).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("WeatherSun") + " " + msgNode.get("Weather30min"))
-                .color(TextColors.YELLOW).build())).quantity(1).build();
-        ItemStack item3 = ItemStack.builder().itemType(ItemTypes.WOOL).add(Keys.DYE_COLOR, DyeColors.YELLOW).add(Keys.ITEM_LORE, list1).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("WeatherSun") + " " + msgNode.get("Weather1hour"))
-                .color(TextColors.YELLOW).build())).quantity(1).build();
+        // Sun
+        List<Component> list1 = new ArrayList<>();
+        list1.add(Component.text(msgNode.get("WeatherSunLore")));
 
-        ItemStack item4 = ItemStack.builder().itemType(ItemTypes.WOOL).add(Keys.DYE_COLOR, DyeColors.LIGHT_BLUE).add(Keys.ITEM_LORE, list2).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("WeatherRain") + " " + msgNode.get("Weather10min"))
-                .color(TextColors.BLUE).build())).quantity(1).build();
-        ItemStack item5 = ItemStack.builder().itemType(ItemTypes.WOOL).add(Keys.DYE_COLOR, DyeColors.LIGHT_BLUE).add(Keys.ITEM_LORE, list2).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("WeatherRain") + " " + msgNode.get("Weather30min"))
-                .color(TextColors.BLUE).build())).quantity(1).build();
-        ItemStack item6 = ItemStack.builder().itemType(ItemTypes.WOOL).add(Keys.DYE_COLOR, DyeColors.LIGHT_BLUE).add(Keys.ITEM_LORE, list2).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("WeatherRain") + " " + msgNode.get("Weather1hour"))
-                .color(TextColors.BLUE).build())).quantity(1).build();
+        ItemStack item1 = ItemStack.builder().itemType(ItemTypes.YELLOW_WOOL).add(Keys.LORE, list1).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("WeatherSun"))
+                .color(NamedTextColor.YELLOW)).quantity(1).build();
+        menu.inventory().set(0, item1);
 
-        ItemStack item7 = ItemStack.builder().itemType(ItemTypes.WOOL).add(Keys.DYE_COLOR, DyeColors.RED).add(Keys.ITEM_LORE, list3).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("WeatherStorm") + " " + msgNode.get("Weather10min"))
-                .color(TextColors.RED).build())).quantity(1).build();
-        ItemStack item8 = ItemStack.builder().itemType(ItemTypes.WOOL).add(Keys.DYE_COLOR, DyeColors.RED).add(Keys.ITEM_LORE, list3).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("WeatherStorm") + " " + msgNode.get("Weather30min"))
-                .color(TextColors.RED).build())).quantity(1).build();
-        ItemStack item9 = ItemStack.builder().itemType(ItemTypes.WOOL).add(Keys.DYE_COLOR, DyeColors.RED).add(Keys.ITEM_LORE, list3).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("WeatherStorm") + " " + msgNode.get("Weather1hour"))
-                .color(TextColors.RED).build())).quantity(1).build();
+        // Rain
+        List<Component> list2 = new ArrayList<>();
+        list2.add(Component.text(msgNode.get("WeatherRainLore")));
 
-        ItemStack item10 = ItemStack.builder().itemType(ItemTypes.GOLD_BLOCK).add(Keys.ITEM_LORE, list4).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("MainMenu"))
-                .color(TextColors.RED).build())).quantity(1).build();
+        ItemStack item2 = ItemStack.builder().itemType(ItemTypes.LIGHT_BLUE_WOOL).add(Keys.LORE, list2).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("WeatherRain"))
+                .color(NamedTextColor.BLUE)).quantity(1).build();
+        menu.inventory().set(1, item2);
 
-        menu.query(SlotPos.of(0, 0)).set(item1);
-        menu.query(SlotPos.of(1, 0)).set(item2);
-        menu.query(SlotPos.of(2, 0)).set(item3);
-        menu.query(SlotPos.of(0, 1)).set(item4);
-        menu.query(SlotPos.of(1, 1)).set(item5);
-        menu.query(SlotPos.of(2, 1)).set(item6);
-        menu.query(SlotPos.of(0, 2)).set(item7);
-        menu.query(SlotPos.of(1, 2)).set(item8);
-        menu.query(SlotPos.of(2, 2)).set(item9);
-        menu.query(SlotPos.of(8, 2)).set(item10);
+        // Storm
+        List<Component> list3 = new ArrayList<>();
+        list3.add(Component.text(msgNode.get("WeatherStormLore")));
+
+        ItemStack item3 = ItemStack.builder().itemType(ItemTypes.RED_WOOL).add(Keys.LORE, list3).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("WeatherStorm"))
+                .color(NamedTextColor.RED)).quantity(1).build();
+        menu.inventory().set(2, item3);
+
+        // Menu principal
+        List<Component> list9 = new ArrayList<>();
+        list9.add(Component.text(msgNode.get("MainMenuLore")));
+
+        ItemStack item9 = ItemStack.builder().itemType(ItemTypes.GOLD_BLOCK).add(Keys.LORE, list9).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("MainMenu"))
+                .color(NamedTextColor.RED)).quantity(1).build();
+        menu.inventory().set(8, item9);
+
+        menu.registerSlotClick(new SlotClickHandler() {
+            @Override
+            public boolean handle(Cause cause, Container container, Slot slot, int slotIndex, ClickType<?> clickType) {
+                if(clickType != ClickTypes.CLICK_LEFT.get() && clickType != ClickTypes.CLICK_RIGHT.get()) return false;
+
+                switch (slotIndex) {
+                    case 0: MainInv.commandMenu(pPlayer, "iw weather sun 12000");
+                        break;
+                    case 1: MainInv.commandMenu(pPlayer, "iw weather rain 12000");
+                        break;
+                    case 2: MainInv.commandMenu(pPlayer, "iw weather storm 12000");
+                        break;
+                    case 8: MainInv.closeOpenMenu(pPlayer, MainInv.menuPrincipal(pPlayer));
+                        break;
+
+                    default:
+                        return false;
+                }
+
+                if (slotIndex != 8)
+                    MainInv.closeMenu(pPlayer);
+
+                return false;
+            }
+        });
 
         return menu;
     }

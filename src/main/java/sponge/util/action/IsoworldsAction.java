@@ -2,6 +2,7 @@ package sponge.util.action;
 
 import common.ManageFiles;
 
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -11,6 +12,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.world.border.WorldBorder;
 import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import sponge.Main;
 import sponge.location.Locations;
@@ -123,12 +125,15 @@ public class IsoworldsAction {
                 }
                 // *********************
             } else {
-                worldProperties = Sponge.server().createWorldProperties(worldname, WorldArchetypes.OVERWORLD);
+                WorldTemplate template = WorldTemplate.builder()
+                        .displayName(Component.text(worldname))
+                        .loadOnStartup(false)
+                        .performsSpawnLogic(false)
+                        .pvp(true)
+                        .build();
                 sponge.util.console.Logger.info("WOLRD PROPERTIES: non présents, création...");
-                //worldProperties.setKeepSpawnLoaded(false);
-                worldProperties.setLoadOnStartup(false);
-                worldProperties.setPerformsSpawnLogic(false);
-                worldProperties.setPvp(true);
+                Sponge.server().worldManager().loadWorld(template);
+
                 // ****** MODULES ******
                 // Border
                 if (sponge.configuration.Configuration.getBorder()) {
@@ -143,7 +148,7 @@ public class IsoworldsAction {
             }
             sponge.util.console.Logger.info("WorldProperties à jour");
 
-        } catch (IOException | NoSuchElementException ie) {
+        } catch (NoSuchElementException ie) {
             ie.printStackTrace();
             lock.remove(pPlayer.uniqueId().toString() + ";" + String.class.getName());
         } catch (ExecutionException | InterruptedException e) {

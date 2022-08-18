@@ -25,19 +25,19 @@
 package sponge.util.inventory.build;
 
 import common.action.IsoworldsAction;
-import org.spongepowered.api.data.key.Keys;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColors;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryArchetypes;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.property.InventoryDimension;
-import org.spongepowered.api.item.inventory.property.InventoryTitle;
-import org.spongepowered.api.item.inventory.property.SlotPos;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.item.inventory.*;
+import org.spongepowered.api.item.inventory.menu.ClickType;
+import org.spongepowered.api.item.inventory.menu.ClickTypes;
+import org.spongepowered.api.item.inventory.menu.InventoryMenu;
+import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
+import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import sponge.util.console.Logger;
 import sponge.util.inventory.MainInv;
 import sponge.util.inventory.build.sub.CreateInv;
@@ -50,53 +50,62 @@ import static sponge.Main.instance;
 
 public class BuildInv {
 
-    public static Inventory getInv(Player pPlayer) {
+    public static InventoryMenu getInv(ServerPlayer pPlayer) {
 
-        Inventory menu = Inventory.builder()
-                .of(InventoryArchetypes.CHEST)
-                .listener(ClickInventoryEvent.class, clickInventoryEvent -> {
-                    // Code event
-                    String menuName = String.valueOf(clickInventoryEvent.getTransactions()
-                            .get(0).getOriginal().get(Keys.DISPLAY_NAME).get().toPlain());
-                    clickInventoryEvent.setCancelled(true);
-                    if (menuName.contains(msgNode.get("BuildCreate"))) {
-                        Logger.info("[TRACKING-IW] Clic menu CREATION: " + pPlayer.getName());
-                        MainInv.closeOpenMenu(pPlayer, CreateInv.getInv(pPlayer));
-                    } else if (menuName.contains(msgNode.get("BuildReforge"))) {
-                        Logger.info("[TRACKING-IW] Clic menu REFONTE: " + pPlayer.getName());
-                        MainInv.commandMenu(pPlayer, "iw r");
-                        MainInv.closeMenu(pPlayer);
-                    } else if (menuName.contains(msgNode.get("MainMenu"))) {
-                        MainInv.closeOpenMenu(pPlayer, MainInv.menuPrincipal(pPlayer));
-                    }
-                })
-                .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of(Text.builder("Isoworlds: " + msgNode.get("InvBuild")).color(TextColors.BLUE).build())))
-                .property(InventoryDimension.PROPERTY_NAME, InventoryDimension.of(9, 1))
-                .build(instance);
-
+        ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X1).completeStructure().carrier(pPlayer).build();
+        InventoryMenu menu = inventory.asMenu();
+        menu.setReadOnly(true);
+        menu.setTitle(Component.text("Isoworlds: " + msgNode.get("InvBuild")).color(NamedTextColor.BLUE));
 
         // Affiche la refonte si le monde est créé, sinon affiche la création
-        if (IsoworldsAction.iwExists(pPlayer.getUniqueId().toString())) {
-            List<Text> list1 = new ArrayList<Text>();
-            list1.add(Text.of(msgNode.get("BuildReforgeLore")));
-            ItemStack item1 = ItemStack.builder().itemType(ItemTypes.WOOL).add(Keys.DYE_COLOR, DyeColors.RED).add(Keys.ITEM_LORE, list1).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("BuildReforge"))
-                    .color(TextColors.GOLD).build())).quantity(1).build();
-            menu.query(SlotPos.of(0, 0)).set(item1);
+        if (IsoworldsAction.iwExists(pPlayer.uniqueId().toString())) {
+            List<Component> list1 = new ArrayList<>();
+            list1.add(Component.text(msgNode.get("BuildReforgeLore")));
+
+            ItemStack item1 = ItemStack.builder().itemType(ItemTypes.RED_WOOL).add(Keys.LORE, list1).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("BuildReforge"))
+                    .color(NamedTextColor.GOLD)).quantity(1).build();
+            menu.inventory().set(0, item1);
         } else {
-            List<Text> list1 = new ArrayList<Text>();
-            list1.add(Text.of(msgNode.get("BuildCreateLore")));
-            ItemStack item1 = ItemStack.builder().itemType(ItemTypes.WOOL).add(Keys.DYE_COLOR, DyeColors.GREEN).add(Keys.ITEM_LORE, list1).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("BuildCreate"))
-                    .color(TextColors.GOLD).build())).quantity(1).build();
-            menu.query(SlotPos.of(0, 0)).set(item1);
+            List<Component> list1 = new ArrayList<>();
+            list1.add(Component.text(msgNode.get("BuildCreateLore")));
+
+            ItemStack item1 = ItemStack.builder().itemType(ItemTypes.GREEN_WOOL).add(Keys.LORE, list1).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("BuildCreate"))
+                    .color(NamedTextColor.GOLD)).quantity(1).build();
+            menu.inventory().set(0, item1);
         }
 
-        // Bouton retour
-        List<Text> list2 = new ArrayList<Text>();
-        list2.add(Text.of(msgNode.get("MainMenuLore")));
-        ItemStack item2 = ItemStack.builder().itemType(ItemTypes.GOLD_BLOCK).add(Keys.ITEM_LORE, list2).add(Keys.DISPLAY_NAME, Text.of(Text.builder(msgNode.get("MainMenu"))
-                .color(TextColors.RED).build())).quantity(1).build();
+        // Menu principal
+        List<Component> list9 = new ArrayList<>();
+        list9.add(Component.text(msgNode.get("MainMenuLore")));
 
-        menu.query(SlotPos.of(8, 0)).set(item2);
+        ItemStack item9 = ItemStack.builder().itemType(ItemTypes.GOLD_BLOCK).add(Keys.LORE, list9).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("MainMenu"))
+                .color(NamedTextColor.RED)).quantity(1).build();
+        menu.inventory().set(8, item9);
+
+        menu.registerSlotClick(new SlotClickHandler() {
+            @Override
+            public boolean handle(Cause cause, Container container, Slot slot, int slotIndex, ClickType<?> clickType) {
+                if(clickType != ClickTypes.CLICK_LEFT.get() && clickType != ClickTypes.CLICK_RIGHT.get()) return false;
+
+                if (slotIndex == 1) {
+                    MainInv.closeOpenMenu(pPlayer, MainInv.menuPrincipal(pPlayer));
+                    return false;
+                }
+
+                if (slotIndex == 0) {
+                    if (IsoworldsAction.iwExists(pPlayer.uniqueId().toString())) {
+                        Logger.info("[TRACKING-IW] Clic menu REFONTE: " + pPlayer.name());
+                        MainInv.commandMenu(pPlayer, "iw r");
+                        MainInv.closeMenu(pPlayer);
+                    } else {
+                        Logger.info("[TRACKING-IW] Clic menu CREATION: " + pPlayer.name());
+                        MainInv.closeOpenMenu(pPlayer, CreateInv.getInv(pPlayer));
+                    }
+                }
+
+                return false;
+            }
+        });
 
         return menu;
     }

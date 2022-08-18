@@ -31,6 +31,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.world.server.ServerWorld;
 import sponge.Main;
 import sponge.util.console.Logger;
 import sponge.util.task.SAS.Pull;
@@ -197,16 +198,15 @@ public class StorageAction {
         }
     }
 
-    // Check if mirror iw
-    //0 normal - 1 anomally
-    public static int isMirrored(String worldname) {
+    public static boolean isMirrored(ServerWorld world) {
+        return isMirrored(world.properties().name());
+    }
+
+    public static boolean isMirrored(String worldname) {
         // Check if file exist, to detect mirrors
         File file = new File(ManageFiles.getPath() + "/" + worldname + "@PUSHED");
         File file2 = new File(ManageFiles.getPath() + "/" + worldname);
         // If exists and contains Isoworld
-        if (file.exists() & file2.exists() & worldname.contains("-Isoworld")) {
-            return 1;
-        }
-        return 0;
+        return (file.exists() & file2.exists() & worldname.contains("-Isoworld"));
     }
 }
