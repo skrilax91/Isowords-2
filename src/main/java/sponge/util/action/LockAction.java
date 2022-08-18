@@ -26,8 +26,6 @@ package sponge.util.action;
 
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 import sponge.Main;
 import sponge.util.message.Message;
 

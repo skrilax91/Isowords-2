@@ -88,7 +88,7 @@ public class Cooldown implements ICooldown {
      * Sponge method
      */
     public Timestamp getPlayerLastCooldown(Player pPlayer, String type) {
-        String uuid_p = StatAction.PlayerToUUID(pPlayer).toString();
+        String uuid_p = pPlayer.uniqueId().toString();
 
         return getPlayerLastCooldown(uuid_p, type);
     }
@@ -139,7 +139,7 @@ public class Cooldown implements ICooldown {
      * Sponge method
      */
     public void addPlayerCooldown(Player pPlayer, String type, int delay) {
-        String uuid_p = StatAction.PlayerToUUID(pPlayer).toString();
+        String uuid_p = pPlayer.uniqueId().toString();
         addPlayerCooldown(uuid_p, type, delay);
     }
 

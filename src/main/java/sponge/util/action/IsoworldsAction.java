@@ -12,9 +12,9 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.world.border.WorldBorder;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
-import org.spongepowered.api.world.storage.WorldProperties;
 import sponge.Main;
 import sponge.location.Locations;
+import sponge.util.console.Logger;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -72,7 +72,7 @@ public class IsoworldsAction {
     }
 
     // Create world properties Isoworlds
-    public static WorldProperties setWorldProperties(String worldname, Player pPlayer) {
+    public static void setWorldProperties(String worldname, Player pPlayer) {
 
         // Check si world properties en place, création else
         CompletableFuture<Optional<ServerWorldProperties>> fWp = Sponge.server().worldManager() .loadProperties(ResourceKey.brigadier(worldname));
@@ -109,41 +109,35 @@ public class IsoworldsAction {
                 worldProperties.setLoadOnStartup(false);
                 worldProperties.setPerformsSpawnLogic(false);
                 worldProperties.setPvp(true);
-                // ****** MODULES ******
-                // Border
-                if (sponge.configuration.Configuration.getBorder()) {
-                    WorldBorder.builder()
-                            .center(Locations.getAxis(worldname).x(), Locations.getAxis(worldname).z())
-                            .targetDiameter(x)
-                            .build()error;
-                }
-                // *********************
                 Sponge.server().worldManager().saveProperties(worldProperties);
 
                 // ****** MODULES ******
                 // Border
                 if (sponge.configuration.Configuration.getBorder()) {
                     Optional<ServerWorld> world = Sponge.server().worldManager().world(ResourceKey.brigadier(worldname));
-                    if (world.isPresent()) {
-                        world.get().getWorldBorder().setDiameter(x);
-                    }
-                    sponge.util.console.Logger.warning("Border nouveau: " + x);
+                    world.ifPresent(serverWorld -> serverWorld.setBorder(WorldBorder.builder()
+                            .center(Locations.getAxis(worldname).x(), Locations.getAxis(worldname).z())
+                            .targetDiameter(x)
+                            .build()));
+                    Logger.warning("Border nouveau: " + x);
                 }
                 // *********************
             } else {
-                worldProperties = Sponge.getServer().createWorldProperties(worldname, WorldArchetypes.OVERWORLD);
+                worldProperties = Sponge.server().createWorldProperties(worldname, WorldArchetypes.OVERWORLD);
                 sponge.util.console.Logger.info("WOLRD PROPERTIES: non présents, création...");
-                worldProperties.setKeepSpawnLoaded(false);
+                //worldProperties.setKeepSpawnLoaded(false);
                 worldProperties.setLoadOnStartup(false);
-                worldProperties.setGenerateSpawnOnLoad(false);
-                worldProperties.setPVPEnabled(true);
+                worldProperties.setPerformsSpawnLogic(false);
+                worldProperties.setPvp(true);
                 // ****** MODULES ******
                 // Border
                 if (sponge.configuration.Configuration.getBorder()) {
-                    worldProperties.setWorldBorderCenter(Locations.getAxis(worldname).getX(), Locations.getAxis(worldname).getZ());
-                    worldProperties.setWorldBorderDiameter(x);
-                    Sponge.server().worldManager().saveProperties(worldProperties);
-                    sponge.util.console.Logger.warning("Border nouveau: " + x);
+                    Optional<ServerWorld> world = Sponge.server().worldManager().world(ResourceKey.brigadier(worldname));
+                    world.ifPresent(serverWorld -> serverWorld.setBorder(WorldBorder.builder()
+                            .center(Locations.getAxis(worldname).x(), Locations.getAxis(worldname).z())
+                            .targetDiameter(x)
+                            .build()));
+                    Logger.warning("Border nouveau: " + x);
                 }
                 // *********************
             }
@@ -152,12 +146,10 @@ public class IsoworldsAction {
         } catch (IOException | NoSuchElementException ie) {
             ie.printStackTrace();
             lock.remove(pPlayer.uniqueId().toString() + ";" + String.class.getName());
-            return null;
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
         }
 
-        return worldProperties;
     }
 
     // Check if Isoworld exists and load it if load true
@@ -170,74 +162,74 @@ public class IsoworldsAction {
             PreparedStatement check = sponge.Main.instance.database.prepare(CHECK);
 
             // UUID _P
-            check_p = StatAction.PlayerToUUID(pPlayer).toString();
+            check_p = pPlayer.uniqueId().toString();
             check.setString(1, check_p);
             // UUID_W
-            check_w = (StatAction.PlayerToUUID(pPlayer) + "-Isoworld");
+            check_w = (pPlayer.uniqueId() + "-Isoworld");
             check.setString(2, check_w);
             // SERVEUR_ID
             check.setString(3, sponge.Main.instance.servername);
             // Requête
             ResultSet rselect = check.executeQuery();
 
-            if (rselect.isBeforeFirst()) {
-                // Chargement si load = true
-                setWorldProperties(StatAction.PlayerToUUID(pPlayer) + "-Isoworld", pPlayer);
-                if (!sponge.util.action.StorageAction.getStatus(StatAction.PlayerToUUID(pPlayer) + "-Isoworld")) {
-                    if (load) {
+            if (!rselect.isBeforeFirst()) {
+                return false;
+            }
+            // Chargement si load = true
+            setWorldProperties(pPlayer.uniqueId() + "-Isoworld", pPlayer);
+            if (!StorageAction.getStatus(pPlayer.uniqueId() + "-Isoworld")) {
+                if (load) {
 
-                        // TEST
-                        Path levelSponge = Paths.get(ManageFiles.getPath() + StatAction.PlayerToUUID(pPlayer) + "-Isoworld/" + "level_sponge.dat");
-                        if (Files.exists(levelSponge)) {
-                            DataContainer dc;
+                    // TEST
+                    Path levelSponge = Paths.get(ManageFiles.getPath() + pPlayer.uniqueId() + "-Isoworld/" + "level_sponge.dat");
+                    if (Files.exists(levelSponge)) {
+                        DataContainer dc;
 
-                            // Find dat
-                            try (GZIPInputStream gzip = new GZIPInputStream(Files.newInputStream(levelSponge, StandardOpenOption.READ))) {
-                                dc = DataFormats.NBT.get().readFrom(gzip);
+                        // Find dat
+                        try (GZIPInputStream gzip = new GZIPInputStream(Files.newInputStream(levelSponge, StandardOpenOption.READ))) {
+                            dc = DataFormats.NBT.get().readFrom(gzip);
 
-                                // get all id
-                                ArrayList allId = IsoworldsAction.getAllDimensionId();
+                            // get all id
+                            ArrayList<Integer> allId = IsoworldsAction.getAllDimensionId();
 
-                                // get id
-                                int dimId = IsoworldsAction.getDimensionId(pPlayer);
+                            // get id
+                            int dimId = IsoworldsAction.getDimensionId(pPlayer);
 
-                                // Si non Isoworld ou non défini
-                                if (dimId == 0) {
-                                    for (int i = 1000; i < Integer.MAX_VALUE; i++) {
-                                        if (!allId.contains(i)) {
-                                            IsoworldsAction.setDimensionId(pPlayer, i);
-                                            dimId = i;
-                                            break;
-                                        }
+                            // Si non Isoworld ou non défini
+                            if (dimId == 0) {
+                                for (int i = 1000; i < Integer.MAX_VALUE; i++) {
+                                    if (!allId.contains(i)) {
+                                        IsoworldsAction.setDimensionId(pPlayer, i);
+                                        dimId = i;
+                                        break;
                                     }
                                 }
+                            }
 
-                                dc.set(toId, dimId);
+                            dc.set(toId, dimId);
 
-                                // define dat
-                                try (OutputStream os = getOutput(true, levelSponge)) {
-                                    DataFormats.NBT.get().writeTo(os, dc);
-                                    os.flush();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-
+                            // define dat
+                            try (OutputStream os = getOutput(true, levelSponge)) {
+                                DataFormats.NBT.get().writeTo(os, dc);
+                                os.flush();
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
-                        }
 
-                        Sponge.server().worldManager().loadWorld(ResourceKey.brigadier(StatAction.PlayerToUUID(pPlayer) + "-Isoworld"));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
+
+                    Sponge.server().worldManager().loadWorld(ResourceKey.brigadier(pPlayer.uniqueId() + "-Isoworld"));
                 }
-                return true;
             }
+            return true;
 
         } catch (Exception se) {
             se.printStackTrace();
             return false;
         }
-        return false;
     }
 
     private static OutputStream getOutput(boolean gzip, Path file) throws IOException {
@@ -250,7 +242,7 @@ public class IsoworldsAction {
     }
 
     // Get all Isoworlds dimension id
-    public static ArrayList getAllDimensionId() {
+    public static ArrayList<Integer> getAllDimensionId() {
         String CHECK = "SELECT `dimension_id` FROM `isoworlds` WHERE `server_id` = ? ORDER BY `dimension_id` DESC";
         String check_w;
         ArrayList<Integer> dimList = new ArrayList<Integer>();
@@ -298,7 +290,7 @@ public class IsoworldsAction {
     // get next dimensionID
     public static Integer getNextDimensionId() {
         // get all id
-        ArrayList allId = IsoworldsAction.getAllDimensionId();
+        ArrayList<Integer> allId = IsoworldsAction.getAllDimensionId();
 
         for (int i = 1000; i < Integer.MAX_VALUE; i++) {
             if (!allId.contains(i)) {

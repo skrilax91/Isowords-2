@@ -59,7 +59,7 @@ public class HomeCommand implements CommandExecutor {
         } else {
             throw new CommandException(Message.error("Your are not a player."));
         }
-        worldname = (StatAction.PlayerToUUID(pPlayer) + "-Isoworld");
+        worldname = (pPlayer.uniqueId() + "-Isoworld");
 
         //If return true then the command is in lock
         if (!instance.cooldown.isAvailable(pPlayer, Cooldown.MAISON)) {

@@ -8,6 +8,7 @@ public class IsoChat {
     static Map<UUID, Boolean> isoChatActivated = new HashMap<>();
 
     public static void toggle(UUID uuid) {
+
         isoChatActivated.put(uuid, !isActivated(uuid));
     }
 

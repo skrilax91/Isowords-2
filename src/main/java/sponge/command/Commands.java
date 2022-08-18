@@ -72,8 +72,8 @@ public class Commands implements CommandExecutor {
                 .addChild(BiomeCommand.getCommand(), "biome", "b")
                 .addChild(TrustCommand.getCommand(), "confiance", "trust", "a")
                 .addChild(UnTrustCommand.getCommand(), "retirer", "supprimer", "untrust", "remove")
-                .addChild(new Weather(), "meteo", "weather", "m", "météo")
-                .addChild(new Time(), "time", "temps", "t", "cycle")
+                .addChild(WeatherCommand.getCommand(), "meteo", "weather", "m", "météo")
+                .addChild(TimeCommand.getCommand(), "time", "temps", "t", "cycle")
                 .executor(new Commands())
                 .build();
     }

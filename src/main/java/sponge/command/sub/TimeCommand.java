@@ -28,32 +28,32 @@ import common.Cooldown;
 import common.Msg;
 import common.action.ChargeAction;
 import common.action.TrustAction;
+import net.kyori.adventure.text.Component;
+import org.spongepowered.api.command.Command;
+import org.spongepowered.api.command.CommandExecutor;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.util.MinecraftDayTime;
 import sponge.Main;
-import org.spongepowered.api.command.CommandCallable;
-import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import sponge.util.action.StatAction;
 import sponge.util.message.Message;
 
-import javax.annotation.Nullable;
 import java.util.*;
 
-public class Time implements CommandCallable {
+public class TimeCommand implements CommandExecutor {
 
     private final Main instance = Main.instance;
 
     @Override
-    public CommandResult process(CommandSource source, String args) throws CommandException {
+    public CommandResult execute(CommandContext context) throws CommandException {
 
-        Player pPlayer = (Player) source;
-        String worldname = (StatAction.PlayerToUUID(pPlayer) + "-Isoworld");
-        String[] arg = args.split(" ");
-        int size = arg.length;
+        Optional<ServerPlayer> ply = StatAction.getPlayerFromCause(context.cause());
+        if (!ply.isPresent())
+            throw new CommandException(Message.error("Your are not a player."));
+        ServerPlayer pPlayer = ply.get();
 
         //If the method return true then the command is in lock
         if (!instance.cooldown.isAvailable(pPlayer, Cooldown.TIME)) {
@@ -67,41 +67,41 @@ public class Time implements CommandCallable {
         }
 
         // Check if actual world is an Isoworld
-        if (!pPlayer.getWorld().getName().contains("-Isoworld")) {
+        if (!pPlayer.world().properties().name().contains("-Isoworld")) {
             pPlayer.sendMessage(Message.error(Msg.msgNode.get("NotInAIsoworld")));
             return CommandResult.success();
         }
 
         // Check if player is trusted
-        if (!TrustAction.isTrusted(pPlayer.getUniqueId().toString(), pPlayer.getWorld().getName())) {
+        if (!TrustAction.isTrusted(pPlayer.uniqueId().toString(), pPlayer.world().properties().name())) {
             pPlayer.sendMessage(Message.error(Msg.msgNode.get("NotTrusted")));
             return CommandResult.success();
         }
 
-        if (size == 0) {
+        if (!context.hasAny(Parameter.key("time", String.class))) {
             pPlayer.sendMessage(Message.success(Msg.msgNode.get("HeaderIsoworld")));
             pPlayer.sendMessage(Message.success(Msg.msgNode.get("SpaceLine")));
             pPlayer.sendMessage(Message.success (Msg.msgNode.get("TimeTypes")));
             pPlayer.sendMessage(Message.success(Msg.msgNode.get("TimeTypesDetail")));
             pPlayer.sendMessage(Message.success(Msg.msgNode.get("SpaceLine")));
             return CommandResult.success();
-        } else if (size == 1) {
-            if (arg[0].equals("jour") || arg[0].equals("day")) {
-                pPlayer.getWorld().getProperties().setWorldTime(0);
-            } else if (arg[0].equals("nuit") || arg[0].equals("night")) {
-                pPlayer.getWorld().getProperties().setWorldTime(12000);
-            }
-        } else {
-            return CommandResult.success();
+        }
+
+        String time = context.requireOne(Parameter.key("time", String.class));
+        MinecraftDayTime actual = pPlayer.world().properties().dayTime();
+        if (time.equals("jour") || time.equals("day")) {
+            pPlayer.world().properties().setDayTime(MinecraftDayTime.of(actual.day(), 6, 0));
+        } else if (time.equals("nuit") || time.equals("night")) {
+            pPlayer.world().properties().setDayTime(MinecraftDayTime.of(actual.day(), 18, 0));
         }
 
         // Send message to all players
-        for (Player p : pPlayer.getWorld().getPlayers()) {
-            p.sendMessage(Message.success(Msg.msgNode.get("TimeChangeSuccess") + " " + pPlayer.getName()));
+        for (ServerPlayer p : pPlayer.world().players()) {
+            p.sendMessage(Message.success(Msg.msgNode.get("TimeChangeSuccess") + " " + pPlayer.name()));
         }
 
         if (!pPlayer.hasPermission("Isoworlds.unlimited.charges")) {
-            ChargeAction.updateCharge(pPlayer.getUniqueId().toString(), charges - 1);
+            ChargeAction.updateCharge(pPlayer.uniqueId().toString(), charges - 1);
         }
 
         pPlayer.sendMessage(Message.success(Msg.msgNode.get("ChargeUsed")));
@@ -110,29 +110,13 @@ public class Time implements CommandCallable {
         return CommandResult.success();
     }
 
+    public static Command.Parameterized getCommand() {
 
-    @Override
-    public List<String> getSuggestions(CommandSource source, String arguments, @Nullable Location<World> targetPosition) throws CommandException {
-        return null;
-    }
-
-    @Override
-    public boolean testPermission(CommandSource source) {
-        return false;
-    }
-
-    @Override
-    public Optional<Text> getShortDescription(CommandSource source) {
-        return null;
-    }
-
-    @Override
-    public Optional<Text> getHelp(CommandSource source) {
-        return null;
-    }
-
-    @Override
-    public Text getUsage(CommandSource source) {
-        return null;
+        return Command.builder()
+                .shortDescription(Component.text("Change le temps de la journée"))
+                .permission("Isoworlds.time")
+                .addParameter(Parameter.builder(String.class).key("time").build())
+                .executor(new WarpCommand())
+                .build();
     }
 }

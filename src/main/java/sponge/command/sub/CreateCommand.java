@@ -76,7 +76,7 @@ public class CreateCommand implements CommandExecutor {
         // Create message
         pPlayer.sendMessage(Message.success(Msg.msgNode.get("CreatingIsoworld")));
 
-        fullPath = (ManageFiles.getPath() + StatAction.PlayerToUUID(pPlayer) + "-Isoworld");
+        fullPath = (ManageFiles.getPath() + pPlayer.uniqueId() + "-Isoworld");
         worldName = (pPlayer.user().profile().uuid() + "-Isoworld");
 
         // Check properties exists

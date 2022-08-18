@@ -26,6 +26,7 @@ package sponge.util.task.SAS;
 
 import common.ManageFiles;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.scheduler.Task;
 import sponge.Main;
 import sponge.configuration.Configuration;
@@ -72,22 +73,19 @@ public class PreventLoadingAtStart {
     }
 
     public static void moveBack() {
-        Task.builder().execute(new Runnable() {
-            @Override
-            public void run() {
-                sponge.util.console.Logger.info("[Isoworlds-SAS]: Remise en place des Isoworlds dans le SAS");
-                File source = new File(ManageFiles.getPath() + "Isoworlds-UTILS/Isoworlds-SAS/");
-                File dest = new File(ManageFiles.getPath());
-                // Retourne la liste des Isoworld tag
-                for (File f : ManageFiles.getOutSAS(new File(source.getPath()))) {
-                    // Gestion des Isoworlds non push, si ne contient pas de tag
-                    if (ManageFiles.move(source + "/" + f.getName(), dest.getPath())) {
-                        logger.info("[Isoworlds-SAS]: " + f.getName() + " retiré du SAS");
-                    } else {
-                        logger.info("[Isoworlds-SAS]: Echec de destockage > " + f.getName());
-                    }
+        Sponge.asyncScheduler().submit(Task.builder().execute(() -> {
+            sponge.util.console.Logger.info("[Isoworlds-SAS]: Remise en place des Isoworlds dans le SAS");
+            File source = new File(ManageFiles.getPath() + "Isoworlds-UTILS/Isoworlds-SAS/");
+            File dest = new File(ManageFiles.getPath());
+            // Retourne la liste des Isoworld tag
+            for (File f : ManageFiles.getOutSAS(new File(source.getPath()))) {
+                // Gestion des Isoworlds non push, si ne contient pas de tag
+                if (ManageFiles.move(source + "/" + f.getName(), dest.getPath())) {
+                    logger.info("[Isoworlds-SAS]: " + f.getName() + " retiré du SAS");
+                } else {
+                    logger.info("[Isoworlds-SAS]: Echec de destockage > " + f.getName());
                 }
             }
-        }).delay(1, TimeUnit.SECONDS).name("Remet les Isoworlds hors du SAS.").submit(Main.instance);
+        }).delay(1, TimeUnit.SECONDS).build(), "Remet les Isoworlds hors du SAS.");
     }
 }

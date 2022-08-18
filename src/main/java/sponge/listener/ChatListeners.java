@@ -1,22 +1,22 @@
 package sponge.listener;
 
 import common.IsoChat;
-import org.spongepowered.api.entity.living.player.Player;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.First;
-import org.spongepowered.api.event.message.MessageChannelEvent;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.event.message.PlayerChatEvent;
 
 public class ChatListeners {
     @Listener
-    public void onIsochat(MessageChannelEvent.Chat event, @First Player sender) {
-        if (IsoChat.isActivated(sender.getUniqueId())) {
-            if (sender.getWorld().getName().endsWith("-Isoworld")) {
+    public void onIsochat(PlayerChatEvent event, @First ServerPlayer sender) {
+        if (IsoChat.isActivated(sender.uniqueId())) {
+            if (sender.world().properties().name().endsWith("-Isoworld")) {
                 event.setCancelled(true);
-                sender.getWorld().getPlayers().forEach(p -> p.sendMessage(Text.of(Text.builder("[Isochat] " + sender.getName() + ": " + event.getRawMessage().toPlain()).color(TextColors.BLUE).build())));
+                sender.world().players().forEach(p -> p.sendMessage(Component.text("[Isochat] " + sender.name() + ": " + event.originalMessage()).color(NamedTextColor.BLUE)));
             } else {
-                IsoChat.toggle(sender.getUniqueId());
+                IsoChat.toggle(sender.uniqueId());
             }
         }
     }

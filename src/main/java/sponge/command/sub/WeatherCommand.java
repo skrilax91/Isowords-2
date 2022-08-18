@@ -28,35 +28,34 @@ import common.Cooldown;
 import common.Msg;
 import common.action.ChargeAction;
 import common.action.TrustAction;
-import org.spongepowered.api.world.weather.Weathers;
+import net.kyori.adventure.text.Component;
+import org.spongepowered.api.command.Command;
+import org.spongepowered.api.command.CommandExecutor;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.util.Ticks;
+import org.spongepowered.api.world.weather.WeatherTypes;
 import sponge.Main;
-import org.spongepowered.api.command.CommandCallable;
-import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import sponge.util.action.StatAction;
 import sponge.util.message.Message;
-
-import javax.annotation.Nullable;
 import java.util.*;
 
 import static java.lang.Integer.parseInt;
 
-public class Weather implements CommandCallable {
+public class WeatherCommand implements CommandExecutor {
 
     private final Main instance = Main.instance;
 
     @Override
-    public CommandResult process(CommandSource source, String args) throws CommandException {
-
-        Player pPlayer = (Player) source;
-        String worldname = (StatAction.PlayerToUUID(pPlayer) + "-Isoworld");
-        String[] arg = args.split(" ");
-        int size = arg.length;
+    public CommandResult execute(CommandContext context) throws CommandException {
+        Optional<ServerPlayer> ply = StatAction.getPlayerFromCause(context.cause());
+        int time = 0;
+        if (!ply.isPresent())
+            throw new CommandException(Message.error("Your are not a player."));
+        ServerPlayer pPlayer = ply.get();
 
         //If the method return true then the command is in lock
         if (!instance.cooldown.isAvailable(pPlayer, Cooldown.METEO)) {
@@ -70,18 +69,18 @@ public class Weather implements CommandCallable {
         }
 
         // Check if actual world is an Isoworld
-        if (!pPlayer.getWorld().getName().contains("-Isoworld")) {
+        if (!pPlayer.world().properties().name().contains("-Isoworld")) {
             pPlayer.sendMessage(Message.error(Msg.msgNode.get("NotInAIsoworld")));
             return CommandResult.success();
         }
 
         // Check if player is trusted
-        if (!TrustAction.isTrusted(pPlayer.getUniqueId().toString(), pPlayer.getWorld().getName())) {
+        if (!TrustAction.isTrusted(pPlayer.uniqueId().toString(), pPlayer.world().properties().name())) {
             pPlayer.sendMessage(Message.error(Msg.msgNode.get("NotTrusted")));
             return CommandResult.success();
         }
 
-        if (size == 1) {
+        if (!context.hasAny(Parameter.key("weather", String.class))) {
             pPlayer.sendMessage(Message.success(Msg.msgNode.get("HeaderIsoworld")));
             pPlayer.sendMessage(Message.success(Msg.msgNode.get("SpaceLine")));
             pPlayer.sendMessage(Message.success (Msg.msgNode.get("WeatherTypes")));
@@ -89,24 +88,37 @@ public class Weather implements CommandCallable {
             pPlayer.sendMessage(Message.success(Msg.msgNode.get("SpaceLine")));
             return CommandResult.success();
 
-        } else if (size == 3) {
-            if (arg[0].equals("soleil") || arg[0].equals("sun")) {
-                pPlayer.getWorld().setWeather(Weathers.CLEAR, parseInt(arg[1]));
-            } else if (arg[0].equals("pluie") || arg[0].equals("rain")) {
-                pPlayer.getWorld().setWeather(Weathers.RAIN, parseInt(arg[1]));
-            } else if (arg[0].equals("orage") || arg[0].equals("storm")) {
-                pPlayer.getWorld().setWeather(Weathers.THUNDER_STORM, parseInt(arg[1]));
-            }
-            // Message pour tous les joueurs
-            for (Player p : pPlayer.getWorld().getPlayers()) {
-                p.sendMessage(Message.success(Msg.msgNode.get("WeatherChangeSuccess") + pPlayer.getName()));
-            }
-        } else {
-            return CommandResult.success();
         }
 
+        String weather = context.requireOne(Parameter.key("weather", String.class));
+        if (!context.hasAny(Parameter.key("time", String.class))) {
+            time = context.requireOne(Parameter.key("time", int.class));
+        }
+
+        switch (weather) {
+            case "soleil":
+            case "sun":
+                pPlayer.world().setWeather(WeatherTypes.CLEAR.get(), Ticks.of(time));
+                break;
+            case "pluie":
+            case "rain":
+                pPlayer.world().setWeather(WeatherTypes.RAIN.get(), Ticks.of(time));
+                break;
+            case "orage":
+            case "storm":
+                pPlayer.world().setWeather(WeatherTypes.THUNDER.get(), Ticks.of(time));
+                break;
+            default:
+                return CommandResult.success();
+        }
+        // Message pour tous les joueurs
+        for (ServerPlayer p : pPlayer.world().players()) {
+            p.sendMessage(Message.success(Msg.msgNode.get("WeatherChangeSuccess") + pPlayer.name()));
+        }
+
+
         if (!pPlayer.hasPermission("Isoworlds.unlimited.charges")) {
-            ChargeAction.updateCharge(pPlayer.getUniqueId().toString(), charges - 1);
+            ChargeAction.updateCharge(pPlayer.uniqueId().toString(), charges - 1);
         }
         pPlayer.sendMessage(Message.success(Msg.msgNode.get("ChargeUsed")));
 
@@ -115,29 +127,14 @@ public class Weather implements CommandCallable {
         return CommandResult.success();
     }
 
+    public static Command.Parameterized getCommand() {
 
-    @Override
-    public List<String> getSuggestions(CommandSource source, String arguments, @Nullable Location<World> targetPosition) throws CommandException {
-        return null;
-    }
-
-    @Override
-    public boolean testPermission(CommandSource source) {
-        return false;
-    }
-
-    @Override
-    public Optional<Text> getShortDescription(CommandSource source) {
-        return null;
-    }
-
-    @Override
-    public Optional<Text> getHelp(CommandSource source) {
-        return null;
-    }
-
-    @Override
-    public Text getUsage(CommandSource source) {
-        return null;
+        return Command.builder()
+                .shortDescription(Component.text("Modifier la météo de l'IsoWorld"))
+                .permission("Isoworlds.weather")
+                .addParameter(Parameter.builder(String.class).key("weather").build())
+                .addParameter(Parameter.builder(String.class).key("time").build())
+                .executor(new WeatherCommand())
+                .build();
     }
 }

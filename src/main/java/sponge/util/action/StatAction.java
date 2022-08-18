@@ -83,11 +83,4 @@ public class StatAction {
             return Optional.empty();
         }
     }
-
-    // Méthode pour convertir type player à uuid
-    public static UUID PlayerToUUID(Player player) {
-        UUID uuid;
-        uuid = player.uniqueId();
-        return (uuid);
-    }
 }

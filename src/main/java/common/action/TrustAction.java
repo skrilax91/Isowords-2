@@ -113,7 +113,13 @@ public class TrustAction {
         return true;
     }
 
-    // Delete playeruuid from worldname trusts
+    /**
+     * Delete player from trusted list on specific IsoWorld
+     *
+     * @param worldname The name of the IsoWorld (can be without -Isoworld)
+     * @param playeruuid The uuid of the player to remove
+     * @return {@link Boolean}
+     */
     public static Boolean deleteTrust(String worldname, String playeruuid) {
         String DELETE_AUTORISATIONS = "DELETE FROM `autorisations` WHERE `uuid_p` = ? AND `uuid_w` = ? AND `server_id` = ?";
         try {

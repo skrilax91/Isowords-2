@@ -49,12 +49,13 @@
 package sponge.util.action;
 
 import common.ManageFiles;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
+import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.WorldArchetypes;
+import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.api.world.storage.WorldProperties;
 import sponge.Main;
 import sponge.util.console.Logger;
@@ -67,6 +68,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -94,7 +96,7 @@ public class DimsAltAction {
                 setId(dim);
 
                 // Load world
-                Sponge.getGame().getServer().loadWorld(dim);
+                Sponge.server().worldManager().loadWorld(ResourceKey.brigadier(dim));
             }
         }
     }
@@ -103,8 +105,8 @@ public class DimsAltAction {
         // Create world properties Isoworlds
 
         // Check si world properties en place, création else
-        Optional<WorldProperties> wp = Sponge.getServer().getWorldProperties(worldname);
-        WorldProperties worldProperties;
+        CompletableFuture<Optional<ServerWorldProperties>> wp = Sponge.server().worldManager().loadProperties(ResourceKey.brigadier(worldname));
+        ServerWorldProperties worldProperties;
 
         try {
             if (wp.isPresent()) {
@@ -133,7 +135,7 @@ public class DimsAltAction {
                 worldProperties.setPVPEnabled(false);
                 worldProperties.setWorldBorderCenter(0, 0);
                 worldProperties.setWorldBorderDiameter(6000);
-                Sponge.getServer().saveWorldProperties(worldProperties);
+                Sponge.server().worldManager().saveProperties(worldProperties);
                 Logger.warning("Border nouveau: " + 6000);
             }
             Logger.info("WorldProperties à jour");
@@ -153,7 +155,7 @@ public class DimsAltAction {
 
             // Find dat
             try (GZIPInputStream gzip = new GZIPInputStream(Files.newInputStream(levelSponge, StandardOpenOption.READ))) {
-                dc = DataFormats.NBT.readFrom(gzip);
+                dc = DataFormats.NBT.get().readFrom(gzip);
                 gz = true;
 
                 if (dim.equals("minage")) {
@@ -168,7 +170,7 @@ public class DimsAltAction {
 
                 // define dat
                 try (OutputStream os = getOutput(gz, levelSponge)) {
-                    DataFormats.NBT.writeTo(os, dc);
+                    DataFormats.NBT.get().writeTo(os, dc);
                     os.flush();
                 } catch (IOException e) {
                     e.printStackTrace();
