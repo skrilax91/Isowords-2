@@ -40,7 +40,7 @@ import java.io.IOException;
 
 public class Create {
 
-    public static void Creation(CommandSender sender, String[] args) {
+    public static void Creation(CommandSender sender, String[] args) throws IOException {
         String fullpath = "";
         String worldname = "";
         Player pPlayer = (Player) sender;

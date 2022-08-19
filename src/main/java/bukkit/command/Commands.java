@@ -32,6 +32,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.io.IOException;
+
 public class Commands implements CommandExecutor {
 
     public static Main instance;
@@ -42,18 +44,34 @@ public class Commands implements CommandExecutor {
 
         if (args.length > 0) {
             String arg = args[0].toLowerCase();
-            if (arg.equals("creation") || arg.equals("créer") || arg.equals("creer") || arg.equals("create") || arg.equals("c")) {
-                Create.Creation(sender, args);
-                return true;
-            } else if (arg.equals("lister") || arg.equals("liste") || arg.equals("list") || arg.equals("l")) {
-                ListWorlds.Liste(sender, args);
-                return true;
-            } else if (arg.equals("refonte") || arg.equals("refondre") || arg.equals("r")) {
-                Reforge.Refonte(sender, args);
-                return true;
-            } else if (arg.equals("maison") || arg.equals("home") || arg.equals("h")) {
-                Home.Maison(sender, args);
-                return true;
+            switch (arg) {
+                case "creation":
+                case "créer":
+                case "creer":
+                case "create":
+                case "c":
+                    try {
+                        Create.Creation(sender, args);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    return true;
+                case "lister":
+                case "liste":
+                case "list":
+                case "l":
+                    ListWorlds.Liste(sender, args);
+                    return true;
+                case "refonte":
+                case "refondre":
+                case "r":
+                    Reforge.Refonte(sender, args);
+                    return true;
+                case "maison":
+                case "home":
+                case "h":
+                    Home.Maison(sender, args);
+                    return true;
                 //} else if (arg.equals("off") || arg.equals("desactiver") || arg.equals("désactiver") || arg.equals("décharger") || arg.equals("unload")) {
                 //    OffCommande.Off(sender, args);
                 //    return true;
@@ -63,26 +81,39 @@ public class Commands implements CommandExecutor {
                 //} else if (arg.equals("teleport") || arg.equals("tp") || arg.equals("teleportation")) {
                 //    TeleportCommande.Teleport(sender, args);
                 //    return true;
-            } else if (arg.equals("confiance") || arg.equals("trust") || arg.equals("a")) {
-                Trust.Confiance(sender, args);
-                return true;
-            } else if (arg.equals("retirer") || arg.equals("supprimer") || arg.equals("untrust") || arg.equals("remove")) {
-                Untrust.RetirerConfiance(sender, args);
-                return true;
-            } else if (arg.equals("météo") || arg.equals("meteo") || arg.equals("m")) {
-                Weather.Meteo(sender, args);
-                return true;
-            } else if (arg.equals("time") || arg.equals("temps") || arg.equals("t") || arg.equals("cycle")) {
-                Time.Time(sender, args);
-                return true;
-            } else if (arg.equals("biome") || arg.equals("biomes") || arg.equals("b")) {
-                Biome.Biome(sender, args);
-                return true;
-            } else if (arg.equals("warp") || arg.equals("w")) {
-                Warp.Warp(sender, args);
-                return true;
-            } else {
-                return true;
+                case "confiance":
+                case "trust":
+                case "a":
+                    Trust.Confiance(sender, args);
+                    return true;
+                case "retirer":
+                case "supprimer":
+                case "untrust":
+                case "remove":
+                    Untrust.RetirerConfiance(sender, args);
+                    return true;
+                case "météo":
+                case "meteo":
+                case "m":
+                    Weather.Meteo(sender, args);
+                    return true;
+                case "time":
+                case "temps":
+                case "t":
+                case "cycle":
+                    Time.Time(sender, args);
+                    return true;
+                case "biome":
+                case "biomes":
+                case "b":
+                    Biome.Biome(sender, args);
+                    return true;
+                case "warp":
+                case "w":
+                    Warp.Warp(sender, args);
+                    return true;
+                default:
+                    return true;
             }
         } else {
             MainInv.MenuPrincipal(pPlayer).open(pPlayer);

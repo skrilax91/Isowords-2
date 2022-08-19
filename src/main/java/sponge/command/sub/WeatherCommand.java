@@ -96,15 +96,12 @@ public class WeatherCommand implements CommandExecutor {
         }
 
         switch (weather) {
-            case "soleil":
-            case "sun":
+            case "clear":
                 pPlayer.world().setWeather(WeatherTypes.CLEAR.get(), Ticks.of(time));
                 break;
-            case "pluie":
             case "rain":
                 pPlayer.world().setWeather(WeatherTypes.RAIN.get(), Ticks.of(time));
                 break;
-            case "orage":
             case "storm":
                 pPlayer.world().setWeather(WeatherTypes.THUNDER.get(), Ticks.of(time));
                 break;
@@ -132,8 +129,8 @@ public class WeatherCommand implements CommandExecutor {
         return Command.builder()
                 .shortDescription(Component.text("Modifier la météo de l'IsoWorld"))
                 .permission("Isoworlds.weather")
-                .addParameter(Parameter.builder(String.class).key("weather").build())
-                .addParameter(Parameter.builder(String.class).key("time").build())
+                .addParameter(Parameter.choices("clear", "rain", "storm").key("weather").build())
+                .addParameter(Parameter.bigInteger().optional().key("time").build())
                 .executor(new WeatherCommand())
                 .build();
     }

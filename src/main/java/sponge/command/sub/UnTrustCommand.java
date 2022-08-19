@@ -135,7 +135,7 @@ public class UnTrustCommand implements CommandExecutor {
         return Command.builder()
                 .shortDescription(Component.text("Retire un joueur à la liste de confiance"))
                 .permission("Isoworlds.untrust")
-                .addParameter(Parameter.builder(String.class).key("player").build())
+                .addParameter(Parameter.string().key("player").build())
                 .executor(new UnTrustCommand())
                 .build();
     }

@@ -39,6 +39,7 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -67,7 +68,8 @@ public final class Main extends JavaPlugin implements IMain {
         // Create needed dirs
         ManageFiles.initIsoworldsDirs();
 
-        File source = new File(ManageFiles.getPath());
+        File source = null;
+        source = new File(ManageFiles.getPath());
         // Retourne la liste des Isoworld tag
         for (File f : ManageFiles.getOutSAS(new File(source.getPath()))) {
             ManageFiles.deleteDir(new File(f.getPath() + "/uid.dat"));

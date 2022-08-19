@@ -26,6 +26,9 @@ package common;
 
 import java.io.*;
 import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -133,8 +136,16 @@ public class ManageFiles {
 
     // Récupération du chemin racine
     public static String getPath() {
-        String path = (System.getProperty("user.dir") + "/Isolonice/");
-        return path;
+        Path path = Paths.get((System.getProperty("user.dir") + "/Isolonice/"));
+        if (!Files.exists(path)) {
+            try {
+                Files.createDirectory(path);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return path.toString();
     }
 
     // Get lang.yml path

@@ -36,6 +36,7 @@ import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.biome.Biomes;
@@ -48,17 +49,18 @@ import java.util.*;
 
 public class BiomeCommand implements CommandExecutor {
 
-    private static final Map<String, Biome> availableBiomes;
+    private static final Map<String, RegistryReference<Biome>> availableBiomes;
     static {
-        Map<String, Biome> aMap = new HashMap<>();
-        aMap.put("plaines", Biomes.PLAINS.get());
-        aMap.put("desert", Biomes.DESERT.get());
-        aMap.put("marais", Biomes.SWAMP.get());
-        aMap.put("océan", Biomes.OCEAN.get());
-        aMap.put("champignon", Biomes.MUSHROOM_FIELDS.get());
-        aMap.put("jungle", Biomes.JUNGLE.get());
-        aMap.put("enfer", Biomes.NETHER_WASTES.get());
-        aMap.put("end", Biomes.THE_END.get());
+        Map<String, RegistryReference<Biome>> aMap = new HashMap<>();
+        // Corriger l'erreur
+        aMap.put("plaines", Biomes.PLAINS);
+        aMap.put("desert", Biomes.DESERT);
+        aMap.put("marais", Biomes.SWAMP);
+        aMap.put("océan", Biomes.OCEAN);
+        aMap.put("champignon", Biomes.MUSHROOM_FIELDS);
+        aMap.put("jungle", Biomes.JUNGLE);
+        aMap.put("enfer", Biomes.NETHER_WASTES);
+        aMap.put("end", Biomes.THE_END);
         availableBiomes = Collections.unmodifiableMap(aMap);
     }
 
@@ -70,14 +72,13 @@ public class BiomeCommand implements CommandExecutor {
         if (!ply.isPresent())
             throw new CommandException(Message.error("Your are not a player."));
         ServerPlayer pPlayer = ply.get();
-        Biome biome;
 
-        if (!context.hasAny(Parameter.key("warp", String.class))) {
+        if (!context.hasAny(Parameter.key("biome", RegistryReference.class))) {
             pPlayer.sendMessage(Message.error("Please provide a biome type"));
             return CommandResult.success();
         }
 
-        String arg = context.requireOne(Parameter.key("warp", String.class));
+        Biome arg = (Biome) context.requireOne(Parameter.key("biome", RegistryReference.class)).get();
         //If the method return true then the command is in lock
         if (!instance.cooldown.isAvailable(pPlayer, Cooldown.BIOME)) {
             return CommandResult.success();
@@ -101,18 +102,11 @@ public class BiomeCommand implements CommandExecutor {
             return CommandResult.success();
         }
 
-        if (!availableBiomes.containsKey(arg)) {
-            pPlayer.sendMessage(Message.error("This biome is not allowed"));
-            return CommandResult.success();
-        }
-
-        biome = availableBiomes.get(arg);
-
         // Setup every blocks of chunk to the clicked biome
         ServerLocation loc = pPlayer.serverLocation();
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
-                pPlayer.world().setBiome(loc.chunkPosition().x() * 16 + x, 0, loc.chunkPosition().z() * 16 + z, biome);
+                pPlayer.world().setBiome(loc.chunkPosition().x() * 16 + x, 0, loc.chunkPosition().z() * 16 + z, arg);
             }
         }
 
@@ -133,7 +127,7 @@ public class BiomeCommand implements CommandExecutor {
         return Command.builder()
                 .shortDescription(Component.text("Permet de modifier le biome d'un chunk"))
                 .permission("Isoworlds.biome")
-                .addParameter(Parameter.builder(String.class).key("type").build())
+                .addParameter(Parameter.choices(RegistryReference.class, availableBiomes).key("biome").build())
                 .executor(new BiomeCommand())
                 .build();
     }

@@ -46,7 +46,7 @@ public class PreventLoadingAtStart {
         File dest = new File(ManageFiles.getPath() + "Isoworlds-UTILS/Isoworlds-SAS/");
         File source = new File(ManageFiles.getPath());
         // Retourne la liste des Isoworld tag
-        for (File f : ManageFiles.getOutSAS(new File(source.getPath()))) {
+        for (File f : ManageFiles.getOutSAS(source)) {
             ManageFiles.deleteDir(new File(f.getPath() + "/level_sponge.dat"));
             ManageFiles.deleteDir(new File(f.getPath() + "/level_sponge.dat_old"));
             // Gestion des Isoworlds non push, si ne contient pas de tag alors "PUSH-SAS" et on le renomme lors de la sortie

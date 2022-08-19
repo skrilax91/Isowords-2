@@ -148,7 +148,7 @@ public class CreateCommand implements CommandExecutor {
         return Command.builder()
                 .shortDescription(Component.text("Permer de créer un isoworld"))
                 .permission("Isoworlds.create")
-                .addParameter(Parameter.builder(char.class).key("type").build())
+                .addParameter(Parameter.choices("n", "v", "o", "f").key("type").build())
                 .executor(new CreateCommand())
                 .build();
     }

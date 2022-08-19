@@ -25,11 +25,11 @@
 package sponge.configuration;
 
 import org.spongepowered.configurate.CommentedConfigurationNode;
-import sponge.Main;
+import sponge.util.ConfigManager;
 
 public class Configuration {
 
-    private static final CommentedConfigurationNode configurationNode = Main.instance.getConfig();
+    private static final CommentedConfigurationNode configurationNode = ConfigManager.configurationNode;
 
     public static String getId() {
         return ((String) configurationNode.node("Isoworlds", "Id").toString());

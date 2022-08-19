@@ -87,7 +87,7 @@ public class WarpCommand implements CommandExecutor {
         return Command.builder()
                 .shortDescription(Component.text("Se téléporter sur des points définis"))
                 .permission("Isoworlds.warp")
-                .addParameter(Parameter.builder(String.class).key("warp").build())
+                .addParameter(Parameter.choices("minage", "exploration", "end", "nether").key("warp").build())
                 .executor(new WarpCommand())
                 .build();
     }

@@ -89,9 +89,9 @@ public class TimeCommand implements CommandExecutor {
 
         String time = context.requireOne(Parameter.key("time", String.class));
         MinecraftDayTime actual = pPlayer.world().properties().dayTime();
-        if (time.equals("jour") || time.equals("day")) {
+        if (time.equals("day")) {
             pPlayer.world().properties().setDayTime(MinecraftDayTime.of(actual.day(), 6, 0));
-        } else if (time.equals("nuit") || time.equals("night")) {
+        } else if (time.equals("night")) {
             pPlayer.world().properties().setDayTime(MinecraftDayTime.of(actual.day(), 18, 0));
         }
 
@@ -115,7 +115,7 @@ public class TimeCommand implements CommandExecutor {
         return Command.builder()
                 .shortDescription(Component.text("Change le temps de la journée"))
                 .permission("Isoworlds.time")
-                .addParameter(Parameter.builder(String.class).key("time").build())
+                .addParameter(Parameter.choices("day", "night").key("time").build())
                 .executor(new WarpCommand())
                 .build();
     }

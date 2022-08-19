@@ -28,6 +28,7 @@ import common.Cooldown;
 import common.Msg;
 import common.action.TrustAction;
 import net.kyori.adventure.text.Component;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.exception.CommandException;
@@ -68,7 +69,7 @@ public class TrustCommand implements CommandExecutor {
             return CommandResult.success();
         }
 
-        if (!context.hasAny(Parameter.key("player", String.class))) {
+        if (!context.hasAny(Parameter.key("player", ServerPlayer.class))) {
             pPlayer.sendMessage(Message.error("Please provide a player username"));
             return CommandResult.success();
         }
@@ -79,17 +80,11 @@ public class TrustCommand implements CommandExecutor {
             return CommandResult.success();
         }
 
-        String username = context.requireOne(Parameter.key("player", String.class));
+        ServerPlayer target = context.requireOne(Parameter.key("player", ServerPlayer.class));
 
         try {
 
-            Optional<User> target = Sponge.server().userManager().load(username).get();
-
-            if (!target.isPresent()) {
-                pPlayer.sendMessage(Message.error(Msg.msgNode.get("InvalidPlayer")));
-                return CommandResult.success();
-            }
-            uuidcible = target.get().uniqueId();
+            uuidcible = target.uniqueId();
 
             if (uuidcible.toString().isEmpty()) {
                 pPlayer.sendMessage(Message.error(Msg.msgNode.get("InvalidPlayer")));
@@ -97,10 +92,6 @@ public class TrustCommand implements CommandExecutor {
             }
         } catch (NoSuchElementException | IllegalArgumentException i) {
             i.printStackTrace();
-            return CommandResult.success();
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-            pPlayer.sendMessage(Message.error(Msg.msgNode.get("InvalidPlayer")));
             return CommandResult.success();
         }
 
@@ -126,7 +117,7 @@ public class TrustCommand implements CommandExecutor {
         return Command.builder()
                 .shortDescription(Component.text("Ajoute un joueur à la liste de confiance"))
                 .permission("Isoworlds.trust")
-                .addParameter(Parameter.builder(String.class).key("player").build())
+                .addParameter(Parameter.player().key("player").build())
                 .executor(new TrustCommand())
                 .build();
     }
