@@ -83,24 +83,22 @@ public class IsoworldsAction {
         try {
             // Deal with permission of owner only
 
-            int x;
+            int x = -1;
             String username = worldname.split("-Isoworld")[0];
             Optional<User> user = StatAction.getPlayerFromUUID(UUID.fromString(username));
 
             // Global
             // Radius border 1000
-            if (user.get().hasPermission("Isoworlds.size.1000")) {
-                x = (sponge.configuration.Configuration.getLargeRadiusSize() * 2);
-                // Radius border 750
-            } else if (user.get().hasPermission("Isoworlds.size.750")) {
-                x = (sponge.configuration.Configuration.getMediumRadiusSize() * 2);
-                // Radius border 500
-            } else if (user.get().hasPermission("Isoworlds.size.500")) {
-                x = (sponge.configuration.Configuration.getSmallRadiusSize() * 2);
-                // Radius border default 250
-            } else {
-                x = (sponge.configuration.Configuration.getDefaultRadiusSize() * 2);
+
+            for (Map.Entry<String, Integer> entry : Main.instance.getConfig().modules().borderModule().getBorders().entrySet()) {
+                if (user.get().hasPermission("Isoworlds.size." + entry.getKey())) {
+                    x = entry.getValue() * 2;
+                    break;
+                }
             }
+
+            if (x == -1)
+                x = (Main.instance.getConfig().modules().borderModule().getBorders().entrySet().iterator().next().getValue() * 2);
 
             Optional<ServerWorldProperties> wp = fWp.get();
 
@@ -115,11 +113,12 @@ public class IsoworldsAction {
 
                 // ****** MODULES ******
                 // Border
-                if (sponge.configuration.Configuration.getBorder()) {
+                if (Main.instance.getConfig().modules().borderModule().isEnable()) {
                     Optional<ServerWorld> world = Sponge.server().worldManager().world(ResourceKey.brigadier(worldname));
+                    int finalX = x;
                     world.ifPresent(serverWorld -> serverWorld.setBorder(WorldBorder.builder()
                             .center(Locations.getAxis(worldname).x(), Locations.getAxis(worldname).z())
-                            .targetDiameter(x)
+                            .targetDiameter(finalX)
                             .build()));
                     Logger.warning("Border nouveau: " + x);
                 }
@@ -136,11 +135,12 @@ public class IsoworldsAction {
 
                 // ****** MODULES ******
                 // Border
-                if (sponge.configuration.Configuration.getBorder()) {
+                if (Main.instance.getConfig().modules().borderModule().isEnable()) {
                     Optional<ServerWorld> world = Sponge.server().worldManager().world(ResourceKey.brigadier(worldname));
+                    int finalX = x;
                     world.ifPresent(serverWorld -> serverWorld.setBorder(WorldBorder.builder()
                             .center(Locations.getAxis(worldname).x(), Locations.getAxis(worldname).z())
-                            .targetDiameter(x)
+                            .targetDiameter(finalX)
                             .build()));
                     Logger.warning("Border nouveau: " + x);
                 }

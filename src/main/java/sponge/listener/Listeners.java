@@ -39,8 +39,6 @@ import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.filter.cause.First;
-import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
-import org.spongepowered.api.event.lifecycle.StoppedGameEvent;
 import org.spongepowered.api.event.lifecycle.StoppingEngineEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.event.world.LoadWorldEvent;
@@ -48,7 +46,6 @@ import org.spongepowered.api.event.world.UnloadWorldEvent;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
-import sponge.configuration.Configuration;
 import sponge.location.Locations;
 import sponge.util.console.Logger;
 import sponge.Main;
@@ -56,10 +53,7 @@ import sponge.Main;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.filter.Getter;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import sponge.util.message.Message;
 
 import java.io.File;
@@ -93,7 +87,7 @@ public class Listeners {
 
         // ****** MODULES ******
         // Spawn Protection
-        if (Configuration.getSpawnProtection() || player.hasPermission("Isoworlds.bypass.spawn")) {
+        if (plugin.getConfig().isSpawnProtection() || player.hasPermission("Isoworlds.bypass.spawn")) {
             return;
         }
 

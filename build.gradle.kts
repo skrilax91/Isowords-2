@@ -19,7 +19,7 @@ repositories {
 
 dependencies {
     implementation("org.bukkit:bukkit:1.8-R0.1-SNAPSHOT")
-    // shade "org.somewebsite:some-dependency:version"
+    implementation("org.spongepowered:configurate-hocon:4.1.2")
 }
 
 sponge {

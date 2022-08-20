@@ -29,7 +29,6 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.scheduler.Task;
 import sponge.Main;
-import sponge.configuration.Configuration;
 
 import java.io.File;
 import java.util.concurrent.TimeUnit;
@@ -61,7 +60,7 @@ public class PreventLoadingAtStart {
                         continue;
                     }
                     // Tag Isoworlds @PUSH if Storage config enabled
-                    if (Configuration.getStorage()) {
+                    if (Main.instance.getConfig().modules().storage().isEnable()) {
                         ManageFiles.rename(ManageFiles.getPath() + "Isoworlds-UTILS/Isoworlds-SAS/" + f.getName(), "@PUSH");
                     }
                     logger.info("[Isoworlds-SAS]: Isoworlds désormais TAG à PUSH");

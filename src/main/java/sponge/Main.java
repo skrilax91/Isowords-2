@@ -27,29 +27,26 @@ package sponge;
 import com.google.inject.Inject;
 import common.*;
 
+import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.event.lifecycle.*;
 import org.spongepowered.configurate.CommentedConfigurationNode;
-import org.spongepowered.configurate.ConfigurateException;
-import org.spongepowered.configurate.ConfigurationOptions;
-import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
-import org.spongepowered.configurate.loader.ConfigurationLoader;
 
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.config.DefaultConfig;
-import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.command.Command;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
+import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 
 import sponge.command.Commands;
-import sponge.configuration.Configuration;
+import sponge.configuration.IsoworldConfiguration;
 import sponge.listener.ChatListeners;
 import sponge.listener.Listeners;
-import sponge.util.ConfigManager;
 import sponge.util.action.DimsAltAction;
 import sponge.util.action.StorageAction;
 import sponge.util.console.Logger;
@@ -57,10 +54,8 @@ import sponge.util.task.PlayerStatistic.PlayTime;
 import sponge.util.task.SAS.PreventLoadingAtStart;
 import sponge.util.task.SAS.Push;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.FileSystems;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -76,6 +71,11 @@ public class Main implements IMain {
     public Cooldown cooldown;
     public Mysql database;
 
+    @DefaultConfig(sharedRoot = false)
+    private final HoconConfigurationLoader ConfigLoader;
+    private CommentedConfigurationNode rootNode;
+    private IsoworldConfiguration config = null;
+
     @Inject
     public static PluginContainer pluginContainer;
 
@@ -85,6 +85,7 @@ public class Main implements IMain {
         this.commonLogger = new common.Logger("sponge");
         this.game = game;
         this.container = container;
+        this.ConfigLoader = HoconConfigurationLoader.builder().path(FileSystems.getDefault().getPath("config/isoworlds2/main.conf")).build();
         instance = this;
     }
 
@@ -94,20 +95,53 @@ public class Main implements IMain {
         event.register(this.container, Commands.getCommand(), "iw", "Isoworld", "Isoworlds");
     }
 
+    @Listener
+    public void onConstruct(final ConstructPluginEvent event) throws SerializationException {
+
+        logger.info(Logger.pluginTag);
+        logger.info("[IW] Chargement de la version Sponge: " + container.metadata().version() + " Auteur: " + container.metadata().contributors().get(0).name() + " Site: " + container.metadata().links().homepage());
+        logger.info("[IW] Chargement des fichiers de configuration...");
+
+        try {
+            rootNode = ConfigLoader.load();
+            this.config = rootNode.get(IsoworldConfiguration.class);
+            rootNode.set(IsoworldConfiguration.class, this.config);
+        } catch (IOException e) {
+            System.err.println("[IW] An error occurred while loading this configuration: " + e.getMessage());
+            if (e.getCause() != null) {
+                e.getCause().printStackTrace();
+            }
+            System.exit(1);
+        }
+
+        try {
+            ConfigLoader.save(rootNode);
+        } catch (final ConfigurateException e) {
+            Logger.severe("[IW] Unable to save your messages configuration! Sorry! " + e.getMessage());
+            System.exit(1);
+        }
+        logger.info("[IW] Fichiers chargés !");
+
+        // Log configs
+        logger.info("[IW][CONFIG] id: " + this.config.serverId());
+        logger.info("[IW][CONFIG] main_worldname: " + this.config.mainWorld());
+        logger.info("[IW][CONFIG] main_world_spawn_coordinate: " + this.config.mainWorldSpawnCoordinate());
+        logger.info("[IW][CONFIG] inactivity_before_world_unload: " + this.config.modules().automaticUnload().inactivityTime());
+    }
+
 
 
     @Listener
     public void onGameInit(StartingEngineEvent<Server> event) {
-        Logger.tag();
-        PluginContainer pdf = Sponge.pluginManager().plugin("isoworlds2").get();
-        Logger.info("Chargement de la version Sponge: " + pdf.metadata().version() + " Auteur: " + pdf.metadata().contributors() + " Site: " + pdf.metadata().links().homepage());
-        Logger.info("Chargement des fichiers de configuration...");
-        ConfigManager.load();
+        //ConfigManager.load();
 
+        Logger.info("Enregistrement des events...");
         registerEvents();
 
         // Create needed dirs
+        Logger.info("Initialisation des répertoires...");
         ManageFiles.initIsoworldsDirs();
+
         Logger.info("Lecture de la configuration...");
         this.initServerName();
         Logger.info("Connexion à la base de données...");
@@ -133,12 +167,6 @@ public class Main implements IMain {
 
         this.cooldown = new Cooldown(this.database, this.servername, "sponge", this.commonLogger);
 
-        // Log configs
-        Logger.info("[CONFIG] id: " + Configuration.getId());
-        Logger.info("[CONFIG] main_worldname: " + Configuration.getMainWorld());
-        Logger.info("[CONFIG] main_world_spawn_coordinate: " + Configuration.getMainWorldSpawnCoordinate());
-        Logger.info("[CONFIG] inactivity_before_world_unload: " + Configuration.getInactivityTime());
-
         // Init manager
         Manager.instance = Main.instance;
 
@@ -157,15 +185,15 @@ public class Main implements IMain {
         // *********************
 
         // Storage
-        if (Configuration.getStorage()) {
+        if (config.modules().storage().isEnable()) {
             // Start push action (unload task with tag)
-            Push.PushProcess(Configuration.getInactivityTime());
+            Push.PushProcess(config.modules().automaticUnload().inactivityTime());
             // Set global status 1
             StorageAction.setGlobalStatus();
         }
 
         // PlayTime
-        if (Configuration.getPlayTime()) {
+        if (config.playTime()) {
             // Start playtime task
             PlayTime.IncreasePlayTime();
         }
@@ -184,7 +212,7 @@ public class Main implements IMain {
         // ****** MODULES ******
 
         // DimensionAlt
-        if (Configuration.getDimensionAlt()) {
+        if (config.modules().dimensionAlt().isEnable()) {
             // Gen alt dim
             DimsAltAction.generateDim();
         }
@@ -207,11 +235,11 @@ public class Main implements IMain {
     private boolean initMySQL() {
         if (this.database == null) {
             this.database = new Mysql(
-                    (String) ConfigManager.configurationNode.node("Isoworlds", "sql", "host").toString(),
-                    (Integer) ConfigManager.configurationNode.node("Isoworlds", "sql", "port").getInt(),
-                    (String) ConfigManager.configurationNode.node("Isoworlds", "sql", "database").toString(),
-                    (String) ConfigManager.configurationNode.node("Isoworlds", "sql", "username").toString(),
-                    (String) ConfigManager.configurationNode.node("Isoworlds", "sql", "password").toString(),
+                    config.getSql().host(),
+                    config.getSql().port(),
+                    config.getSql().database(),
+                    config.getSql().username(),
+                    config.getSql().password(),
                     true
             );
 
@@ -229,7 +257,7 @@ public class Main implements IMain {
 
     private void initServerName() {
         try {
-            this.servername = ConfigManager.configurationNode.node("Isoworlds2", "Id").toString();
+            this.servername = config.serverId();
         } catch (NullPointerException npe) {
             npe.printStackTrace();
         }
@@ -250,7 +278,7 @@ public class Main implements IMain {
         return lock;
     }
 
-    public CommentedConfigurationNode getConfig() {
-        return ConfigManager.configurationNode;
+    public IsoworldConfiguration getConfig() {
+        return config;
     }
 }
