@@ -27,7 +27,6 @@ package sponge.command.sub;
 import common.Cooldown;
 import common.ManageFiles;
 import common.Msg;
-import common.action.IsoworldsAction;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.Command;
@@ -37,6 +36,7 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
+import sponge.Database.Methods.IsoworldsAction;
 import sponge.Main;
 
 import org.spongepowered.api.Sponge;
@@ -45,6 +45,7 @@ import sponge.util.action.StatAction;
 import sponge.util.message.Message;
 
 import java.io.File;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -71,7 +72,7 @@ public class ReforgeCommand implements CommandExecutor {
         }
 
         // Check is Isoworld exists in database
-        if (!sponge.util.action.IsoworldsAction.isPresent(pPlayer, false)) {
+        if (!sponge.Database.Methods.IsoworldsAction.isPresent(pPlayer, false)) {
             pPlayer.sendMessage(Message.error(Msg.msgNode.get("IsoworldNotFound")));
             return CommandResult.success();
         }
@@ -112,9 +113,13 @@ public class ReforgeCommand implements CommandExecutor {
             Sponge.server().worldManager().unloadWorld(Sponge.server().worldManager().world(ResourceKey.brigadier(worldname)).get());
         }
 
-        if (!IsoworldsAction.deleteIsoworld(pPlayer.uniqueId().toString())) {
-            pPlayer.sendMessage(Message.error(Msg.msgNode.get("FailReforgeIsoworld")));
-            return CommandResult.success();
+        try {
+            if (!IsoworldsAction.deleteIsoworld(pPlayer.uniqueId().toString())) {
+                pPlayer.sendMessage(Message.error(Msg.msgNode.get("FailReforgeIsoworld")));
+                return CommandResult.success();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
         // Deleting isoworld
         Sponge.server().worldManager().deleteWorld(ResourceKey.brigadier(worldname));

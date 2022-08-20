@@ -26,7 +26,7 @@ package sponge.command.sub;
 
 import common.Cooldown;
 import common.Msg;
-import common.action.TrustAction;
+import sponge.Database.Methods.TrustAction;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.Command;
@@ -37,16 +37,14 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
+import sponge.Database.Methods.IsoworldsAction;
 import sponge.Main;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import sponge.util.action.StatAction;
 import sponge.util.message.Message;
 
@@ -76,7 +74,7 @@ public class UnTrustCommand implements CommandExecutor {
         }
 
         // SELECT WORLD
-        if (!sponge.util.action.IsoworldsAction.isPresent(pPlayer, false)) {
+        if (!IsoworldsAction.isPresent(pPlayer, false)) {
             pPlayer.sendMessage(Message.error(Msg.msgNode.get("IsoworldNotFound")));
             return CommandResult.success();
         }
@@ -104,13 +102,13 @@ public class UnTrustCommand implements CommandExecutor {
         }
 
         // CHECK AUTORISATIONS
-        if (!TrustAction.isTrusted(target.uniqueId().toString(), pPlayer.uniqueId().toString())) {
+        if (!TrustAction.isTrusted(target.player().get(), pPlayer.uniqueId().toString())) {
             pPlayer.sendMessage(Message.error(Msg.msgNode.get("NotTrusted")));
             return CommandResult.success();
         }
 
         // DELETE AUTORISATION
-        if (!TrustAction.deleteTrust(pPlayer.uniqueId().toString(), target.uniqueId().toString())) {
+        if (!TrustAction.deleteTrust(pPlayer.uniqueId().toString(), target.player().get())) {
             return CommandResult.success();
         }
 

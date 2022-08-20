@@ -43,6 +43,7 @@ import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 
+import sponge.Database.MysqlHandler;
 import sponge.command.Commands;
 import sponge.configuration.IsoworldConfiguration;
 import sponge.listener.ChatListeners;
@@ -50,12 +51,12 @@ import sponge.listener.Listeners;
 import sponge.util.action.DimsAltAction;
 import sponge.util.action.StorageAction;
 import sponge.util.console.Logger;
-import sponge.util.task.PlayerStatistic.PlayTime;
 import sponge.util.task.SAS.PreventLoadingAtStart;
 import sponge.util.task.SAS.Push;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -69,7 +70,7 @@ public class Main implements IMain {
     public String servername;
     public static Map<String, Integer> lock = new HashMap<>();
     public Cooldown cooldown;
-    public Mysql database;
+    public MysqlHandler database;
 
     @DefaultConfig(sharedRoot = false)
     private final HoconConfigurationLoader ConfigLoader;
@@ -93,7 +94,7 @@ public class Main implements IMain {
     }
 
     @Listener
-    public void onConstruct(final ConstructPluginEvent event) throws SerializationException {
+    public void onConstruct(final ConstructPluginEvent event) throws SQLException, ClassNotFoundException {
 
         logger.info(Logger.pluginTag);
         logger.info("[IW] Chargement de la version Sponge: " + container.metadata().version() + " Auteur: " + container.metadata().contributors().get(0).name() + " Site: " + container.metadata().links().homepage());
@@ -127,6 +128,9 @@ public class Main implements IMain {
 
         logger.info("[IW] Enregistrement des events...");
         registerEvents();
+        logger.info("[IW] Connexion à la base de donnée " + config.getSql().database());
+        this.database = new MysqlHandler(config.getSql());
+        logger.info("[IW] Isoworlds connecté avec succès à la base de données !");
     }
 
 
@@ -141,12 +145,6 @@ public class Main implements IMain {
 
         Logger.info("Lecture de la configuration...");
         this.initServerName();
-        Logger.info("Connexion à la base de données...");
-        if (!this.initMySQL()) {
-            Logger.severe("Une erreur c'est produite lors de la tentative de connexion !");
-            return;
-        }
-        Logger.info("Isoworlds connecté avec succès à la base de données !");
 
         // Copy lang.yml if not in config folder
         // thx @ryantheleac for intellij module path
@@ -166,9 +164,6 @@ public class Main implements IMain {
 
         // Init manager
         Manager.instance = Main.instance;
-
-        // Set structure if needed
-        this.database.setStructure();
     }
 
     @Listener
@@ -229,29 +224,6 @@ public class Main implements IMain {
         return logger;
     }
 
-    private boolean initMySQL() {
-        if (this.database == null) {
-            this.database = new Mysql(
-                    config.getSql().host(),
-                    config.getSql().port(),
-                    config.getSql().database(),
-                    config.getSql().username(),
-                    config.getSql().password(),
-                    true
-            );
-
-            try {
-                this.database.connect();
-            } catch (Exception ex) {
-                Logger.info("Une erreur est survenue lors de la connexion à la base de données: " + ex.getMessage());
-                ex.printStackTrace();
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     private void initServerName() {
         try {
             this.servername = config.serverId();
@@ -261,7 +233,7 @@ public class Main implements IMain {
     }
 
     @Override
-    public Mysql getMysql() {
+    public MysqlHandler getMysql() {
         return this.database;
     }
 

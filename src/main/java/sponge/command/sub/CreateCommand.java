@@ -26,7 +26,6 @@ package sponge.command.sub;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.Command;
@@ -36,20 +35,18 @@ import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import sponge.util.action.IsoworldsAction;
+import sponge.Database.Methods.IsoworldsAction;
 import sponge.util.message.Message;
 import common.Msg;
-import common.action.TrustAction;
+import sponge.Database.Methods.TrustAction;
 import sponge.location.Locations;
 import common.ManageFiles;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.entity.living.player.Player;
-import sponge.util.action.StatAction;
-import sponge.util.console.Logger;
+
 import java.io.*;
-import java.time.Duration;
+import java.sql.SQLException;
 
 public class CreateCommand implements CommandExecutor {
 
@@ -126,19 +123,23 @@ public class CreateCommand implements CommandExecutor {
         //  Create world properties
         IsoworldsAction.setWorldProperties(worldName, pPlayer);
 
-        if (IsoworldsAction.setIsoworld(pPlayer)) {
-            if (TrustAction.setTrust(pPlayer.user().profile().uuid().toString())) {
-                // Loading
-                Sponge.game().server().worldManager().loadWorld(ResourceKey.brigadier(worldName));
+        try {
+            if (IsoworldsAction.addIsoworld(pPlayer)) {
+                if (TrustAction.setTrust(pPlayer)) {
+                    // Loading
+                    Sponge.game().server().worldManager().loadWorld(ResourceKey.brigadier(worldName));
 
-                pPlayer.sendMessage(Message.success(Msg.msgNode.get("IsoworldsuccessCreate")));
+                    pPlayer.sendMessage(Message.success(Msg.msgNode.get("IsoworldsuccessCreate")));
 
-                // Teleport
-                Locations.teleport(pPlayer, worldName);
+                    // Teleport
+                    Locations.teleport(pPlayer, worldName);
 
-                // Welcome title (only sponge)
-                pPlayer.showTitle(Title.title(Component.text(Msg.msgNode.get("Welcome1") + pPlayer.name()), Component.text(Msg.msgNode.get("Welcome2"))));
+                    // Welcome title (only sponge)
+                    pPlayer.showTitle(Title.title(Component.text(Msg.msgNode.get("Welcome1") + pPlayer.name()), Component.text(Msg.msgNode.get("Welcome2"))));
+                }
             }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
         return CommandResult.success();
     }

@@ -37,6 +37,7 @@ import sponge.util.console.Logger;
 import sponge.util.task.SAS.Pull;
 
 import java.io.File;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.concurrent.TimeUnit;
@@ -117,7 +118,8 @@ public class StorageAction {
         String CHECK = "SELECT STATUS FROM `isoworlds` WHERE `uuid_w` = ? AND `server_id` = ?";
         String check_w;
         try {
-            PreparedStatement check = plugin.database.prepare(CHECK);
+            Connection connection = plugin.database.getConnection();
+            PreparedStatement check = connection.prepareStatement(CHECK);
 
             // UUID_W
             check_w = world;
@@ -150,7 +152,8 @@ public class StorageAction {
     public static Boolean setGlobalStatus() {
         String CHECK = "UPDATE `isoworlds` SET `status` = 1 WHERE `server_id` = ?";
         try {
-            PreparedStatement check = plugin.database.prepare(CHECK);
+            Connection connection = plugin.database.getConnection();
+            PreparedStatement check = connection.prepareStatement(CHECK);
 
             // SERVEUR_ID
             check.setString(1, plugin.servername);
@@ -169,7 +172,8 @@ public class StorageAction {
         String CHECK = "UPDATE `isoworlds` SET `status` = ? WHERE `uuid_w` = ? AND `server_id` = ?";
         String check_w;
         try {
-            PreparedStatement check = plugin.database.prepare(CHECK);
+            Connection connection = plugin.database.getConnection();
+            PreparedStatement check = connection.prepareStatement(CHECK);
 
             // STATUS
             check.setInt(1, status);

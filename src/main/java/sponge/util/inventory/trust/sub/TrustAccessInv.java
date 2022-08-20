@@ -25,7 +25,7 @@
 package sponge.util.inventory.trust.sub;
 
 import common.Cooldown;
-import common.action.TrustAction;
+import sponge.Database.Methods.TrustAction;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.ResourceKey;
@@ -41,8 +41,8 @@ import org.spongepowered.api.item.inventory.menu.ClickTypes;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
-import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.scheduler.Task;
+import sponge.Database.Methods.IsoworldsAction;
 import sponge.Main;
 import sponge.location.Locations;
 import sponge.util.action.StatAction;
@@ -55,7 +55,6 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static common.Msg.msgNode;
-import static sponge.Main.instance;
 
 public class TrustAccessInv {
 
@@ -75,7 +74,7 @@ public class TrustAccessInv {
                 .color(NamedTextColor.RED)).quantity(1).build();
         menu.inventory().set(35, item9);
 
-        ResultSet trusts = TrustAction.getAccess(pPlayer.uniqueId().toString());
+        ResultSet trusts = TrustAction.getAccess(pPlayer);
 
         try {
             for (int i = 0; Objects.requireNonNull(trusts).next(); ++i) {
@@ -132,7 +131,7 @@ public class TrustAccessInv {
                         // Removing iwInProcess in task
                         if (StorageAction.checkTag(pPlayer, worldname)) {
                             // Chargement du Isoworld + tp
-                            sponge.util.action.IsoworldsAction.setWorldProperties(worldname, pPlayer);
+                            IsoworldsAction.setWorldProperties(worldname, pPlayer);
                             Sponge.server().worldManager().loadWorld(ResourceKey.brigadier(worldname));
                             Locations.teleport(pPlayer, worldname);
                             plugin.cooldown.addPlayerCooldown(pPlayer, Cooldown.CONFIANCE, Cooldown.CONFIANCE_DELAY);

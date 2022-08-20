@@ -26,8 +26,8 @@ package sponge.command.sub;
 
 import common.Cooldown;
 import common.Msg;
-import common.action.ChargeAction;
-import common.action.TrustAction;
+import sponge.Database.Methods.ChargeAction;
+import sponge.Database.Methods.TrustAction;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandExecutor;
@@ -37,7 +37,6 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.registry.RegistryReference;
-import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.biome.Biomes;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -45,6 +44,7 @@ import sponge.Main;
 import sponge.util.action.StatAction;
 import sponge.util.message.Message;
 
+import java.sql.SQLException;
 import java.util.*;
 
 public class BiomeCommand implements CommandExecutor {
@@ -85,8 +85,15 @@ public class BiomeCommand implements CommandExecutor {
         }
 
         // If got charges
-        int charges = ChargeAction.checkCharge(pPlayer);
-        if (charges == -1) {
+        int charges = 0;
+        try {
+            charges = ChargeAction.getCharge(pPlayer);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (charges <= 0) {
+            pPlayer.sendMessage(sponge.util.message.Message.error(Msg.msgNode.get("ChargeEmpty")));
             return CommandResult.success();
         }
 
@@ -97,7 +104,7 @@ public class BiomeCommand implements CommandExecutor {
         }
 
         // Check if player is trusted
-        if (!TrustAction.isTrusted(pPlayer.uniqueId().toString(), pPlayer.world().properties().name())) {
+        if (!TrustAction.isTrusted(pPlayer, pPlayer.world().properties().name())) {
             pPlayer.sendMessage(Message.error(Msg.msgNode.get("NotTrusted")));
             return CommandResult.success();
         }
@@ -110,9 +117,12 @@ public class BiomeCommand implements CommandExecutor {
             }
         }
 
-        if (!pPlayer.hasPermission("Isoworlds.unlimited.charges")) {
-            ChargeAction.updateCharge(pPlayer.uniqueId().toString(), charges - 1);
-            pPlayer.sendMessage(Message.success(Msg.msgNode.get("ChargeUsed")));
+
+        try {
+            if (ChargeAction.updateCharge(pPlayer, charges - 1))
+                pPlayer.sendMessage(Message.success(Msg.msgNode.get("ChargeUsed")));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
 
         pPlayer.sendMessage(Message.success(Msg.msgNode.get("BiomeChanged")));

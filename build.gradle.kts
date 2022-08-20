@@ -20,6 +20,7 @@ repositories {
 dependencies {
     implementation("org.bukkit:bukkit:1.8-R0.1-SNAPSHOT")
     implementation("org.spongepowered:configurate-hocon:4.1.2")
+    implementation( "mysql", "mysql-connector-java", "8.0.25")
 }
 
 sponge {

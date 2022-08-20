@@ -24,12 +24,14 @@
  */
 package common;
 
+import sponge.Database.MysqlHandler;
+
 import java.util.Map;
 
 public interface IMain {
     String servername = null;
-    Mysql database = null;
-    Mysql getMysql();
+    MysqlHandler database = null;
+    MysqlHandler getMysql();
     String getServername();
     Map<String, Integer> getLock();
 }

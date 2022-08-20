@@ -26,12 +26,12 @@ package sponge.listener;
 
 import common.ManageFiles;
 import common.Msg;
-import common.action.IsoworldsAction;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -46,6 +46,7 @@ import org.spongepowered.api.event.world.UnloadWorldEvent;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
+import sponge.Database.Methods.IsoworldsAction;
 import sponge.location.Locations;
 import sponge.util.console.Logger;
 import sponge.Main;
@@ -57,6 +58,7 @@ import org.spongepowered.api.event.filter.Getter;
 import sponge.util.message.Message;
 
 import java.io.File;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.*;
@@ -232,7 +234,8 @@ public class Listeners {
 
         if (eventworld.contains("-Isoworld")) {
             try {
-                PreparedStatement check = plugin.database.prepare(CHECK);
+                Connection connection = plugin.database.getConnection();
+                PreparedStatement check = connection.prepareStatement(CHECK);
                 // UUID_P
                 check_p = pPlayer.uniqueId().toString();
                 check.setString(1, check_p);

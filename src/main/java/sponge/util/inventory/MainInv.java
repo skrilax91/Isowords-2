@@ -25,8 +25,8 @@
 package sponge.util.inventory;
 
 import common.IsoChat;
-import common.action.ChargeAction;
-import common.action.PlayTimeAction;
+import sponge.Database.Methods.ChargeAction;
+import sponge.Database.Methods.PlayTimeAction;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.Sponge;
@@ -52,6 +52,7 @@ import sponge.util.inventory.trust.TrustInv;
 import sponge.util.inventory.warp.WarpInv;
 import sponge.util.inventory.weather.WeatherInv;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -68,8 +69,14 @@ public class MainInv {
         menu.setTitle(Component.text("Isoworlds"));
 
         // Récupération nombre charge
-        Integer charges = ChargeAction.getCharge(pPlayer);
-        Integer playtime = PlayTimeAction.getPlayTime(pPlayer.uniqueId().toString());
+        Integer charges = null;
+        try {
+            charges = ChargeAction.getCharge(pPlayer);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        Integer playtime = PlayTimeAction.getPlayTime(pPlayer);
         String formatedPlayTime = (playtime > 60) ? playtime / 60 + " H " + playtime % 60 + " m" : playtime + " m";
 
 

@@ -34,12 +34,12 @@ import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import sponge.Database.Methods.IsoworldsAction;
 import sponge.Main;
 import sponge.location.Locations;
 
 import org.spongepowered.api.command.CommandResult;
 import sponge.util.action.LockAction;
-import sponge.util.action.StatAction;
 import sponge.util.action.StorageAction;
 import sponge.util.message.Message;
 
@@ -82,7 +82,7 @@ public class HomeCommand implements CommandExecutor {
         Main.lock.remove(pPlayer.uniqueId().toString() + ";" + "checkTag");
 
         // Check if Isoworld exists and load it if need (true)
-        if (!sponge.util.action.IsoworldsAction.isPresent(pPlayer, true)) {
+        if (!IsoworldsAction.isPresent(pPlayer, true)) {
             pPlayer.sendMessage(Message.error(Msg.msgNode.get("IsoworldNotFound")));
             return CommandResult.success();
         }

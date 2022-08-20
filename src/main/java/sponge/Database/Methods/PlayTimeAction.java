@@ -22,25 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package common.action;
+package sponge.Database.Methods;
 
 import common.Manager;
-import common.Mysql;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import sponge.Database.MysqlHandler;
+import sponge.Main;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class PlayTimeAction {
 
-    private static final Mysql database = Manager.getInstance().getMysql();
+    private static final MysqlHandler database = Main.instance.getMysql();
 
-    // Add playertime to player
-    public static Boolean updatePlayTime(String playeruuid) {
+    /**
+     * <p> Add 1 playtime of a player
+     *
+     * @param ply The player
+     * @return whether the function was successful or not
+     */
+    public static Boolean updatePlayTime(ServerPlayer ply) {
         String CHECK = "UPDATE `players_info` SET `playtimes` = `playtimes` + 1 WHERE `uuid_p` = ?";
         try {
-            PreparedStatement check = database.prepare(CHECK);
+            Connection connection = database.getConnection();
+
+            PreparedStatement check = connection.prepareStatement(CHECK);
             // Player uuid
-            check.setString(1, playeruuid);
+            check.setString(1, ply.uniqueId().toString());
             // Request
             check.executeUpdate();
             return true;
@@ -50,19 +61,24 @@ public class PlayTimeAction {
         }
     }
 
-    // Get charge of a player
-    public static Integer getPlayTime(String playeruuid) {
+    /**
+     * <p> Get playtime of a player
+     *
+     * @param ply The player
+     * @return the play time of the player
+     */
+    public static Integer getPlayTime(ServerPlayer ply) {
         String CHECK = "SELECT `playtimes` FROM `players_info` WHERE `uuid_p` = ?";
-        Integer number;
+
         try {
-            PreparedStatement check = database.prepare(CHECK);
-            // Player uuid
-            check.setString(1, playeruuid);
+            Connection connection = database.getConnection();
+
+            PreparedStatement check = connection.prepareStatement(CHECK);
+            check.setString(1, ply.uniqueId().toString());
             // Reqest
-            ResultSet rselect = check.executeQuery();
-            if (rselect.next()) {
-                number = rselect.getInt(1);
-                return number;
+            ResultSet res = check.executeQuery();
+            if (res.next()) {
+                return res.getInt(1);
             }
         } catch (Exception se) {
             se.printStackTrace();

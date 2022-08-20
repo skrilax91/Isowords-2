@@ -34,8 +34,6 @@ public class Logger {
     void log(String message) {
         if (this.type.equals("sponge")) {
             sponge.util.console.Logger.info(message);
-        } else if (this.type.equals("bukkit")) {
-            bukkit.util.console.Logger.info(message);
         }
     }
 }

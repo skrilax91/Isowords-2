@@ -24,11 +24,9 @@
  */
 package sponge.util.inventory.build.sub;
 
-import common.action.IsoworldsAction;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.item.ItemTypes;
@@ -38,7 +36,6 @@ import org.spongepowered.api.item.inventory.menu.ClickTypes;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
-import sponge.util.console.Logger;
 import sponge.util.inventory.MainInv;
 import sponge.util.inventory.build.BuildInv;
 
@@ -46,7 +43,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static common.Msg.msgNode;
-import static sponge.Main.instance;
 
 public class CreateInv {
 

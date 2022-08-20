@@ -25,21 +25,22 @@
 package common;
 
 import org.spongepowered.api.entity.living.player.Player;
+import sponge.Database.MysqlHandler;
 import sponge.Main;
-import sponge.util.action.StatAction;
 import sponge.util.message.Message;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 
 public class Cooldown implements ICooldown {
     private final Logger logger;
-    private final Mysql database;
+    private final MysqlHandler database;
     private final String servername;
     private final String type;
 
-    public Cooldown(Mysql database, String servername, String type, Logger logger) {
+    public Cooldown(MysqlHandler database, String servername, String type, Logger logger) {
         this.database = database;
         this.servername = servername;
         this.type = type;
@@ -60,22 +61,6 @@ public class Cooldown implements ICooldown {
             String timerMessage = this.getCooldownTimer(cooldown);
             pPlayer.sendMessage(Message.error(Msg.msgNode.get("CommandCooldown") + timerMessage));
             Main.lock.remove(pPlayer.uniqueId().toString() + ";" + String.class.getName());
-
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Bukkit method
-     */
-    public boolean isAvailable(org.bukkit.entity.Player pPlayer, String type) {
-        Timestamp cooldown = this.getPlayerLastCooldown(pPlayer, type);
-        if (cooldown != null) {
-            String timerMessage = this.getCooldownTimer(cooldown);
-            pPlayer.sendMessage(bukkit.util.message.Message.error(Msg.msgNode.get("CommandCooldown") + timerMessage));
-            bukkit.Main.lock.remove(pPlayer.getUniqueId().toString() + ";" + String.class.getName());
 
             return false;
         }
@@ -108,7 +93,8 @@ public class Cooldown implements ICooldown {
     private Timestamp getPlayerLastCooldown(String uuid_p, String type) {
         String query = "SELECT * FROM `players_cooldown` WHERE `uuid_p` = ? AND `cooldown_type` = ? AND `date_time` > ? AND `server_id` = ?";
         try {
-            PreparedStatement check = this.database.prepare(query);
+            Connection connection = database.getConnection();
+            PreparedStatement check = connection.prepareStatement(query);
 
             // UUID _P
             check.setString(1, uuid_p);
@@ -155,7 +141,8 @@ public class Cooldown implements ICooldown {
         String query = "INSERT INTO `players_cooldown` (`uuid_p`, `date_time`, `cooldown_type`, `server_id`) VALUES (?, ?, ?, ?)";
         Timestamp timestamp = new Timestamp(System.currentTimeMillis() + (delay * 1000L));
         try {
-            PreparedStatement insert = this.database.prepare(query);
+            Connection connection = database.getConnection();
+            PreparedStatement insert = connection.prepareStatement(query);
 
             // UUID_P
             insert.setString(1, uuid_p);

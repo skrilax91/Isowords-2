@@ -24,7 +24,7 @@
  */
 package sponge.util.inventory.trust.sub;
 
-import common.action.TrustAction;
+import sponge.Database.Methods.TrustAction;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.Sponge;
@@ -39,7 +39,6 @@ import org.spongepowered.api.item.inventory.menu.ClickTypes;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
-import org.spongepowered.api.profile.GameProfile;
 import sponge.util.action.StatAction;
 import sponge.util.console.Logger;
 import sponge.util.inventory.MainInv;
