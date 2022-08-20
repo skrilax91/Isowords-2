@@ -3,7 +3,7 @@ package sponge.configuration;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 @ConfigSerializable
 public class AutomaticUnloadConfig {
-    private boolean enable = false;
+    private boolean enable = true;
     private int inactivityTime = 15;
 
     public boolean enabled() { return this.enable; }

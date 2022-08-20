@@ -32,7 +32,7 @@ public class IsoworldConfiguration {
     private boolean spawnProtection = true;
 
     @Comment("This module will count playtime of players (by simply adding 1 every minutes if player is online)")
-    private boolean playTime = true;
+    private boolean playTime = false;
 
     @Comment("Setup sql connection")
     private final MysqlConfig sql = new MysqlConfig();
@@ -89,9 +89,4 @@ public class IsoworldConfiguration {
     public boolean isSpawnProtection() {
         return spawnProtection;
     }
-}
-
-@ConfigSerializable
-class SafePlateformConfig {
-    private boolean enable = false;
 }

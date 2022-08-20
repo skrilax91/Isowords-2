@@ -168,12 +168,12 @@ public class ManageFiles {
     // Init needed dirs
     public static void initIsoworldsDirs() {
 
-        File utils = new File(ManageFiles.getPath() + "Isoworlds-UTILS/");
-        File sas = new File(ManageFiles.getPath() + "Isoworlds-UTILS/Isoworlds-SAS");
-        File patern = new File(ManageFiles.getPath() + "Isoworlds-UTILS/Isoworlds-PATERN");
-        File paternF = new File(ManageFiles.getPath() + "Isoworlds-UTILS/Isoworlds-PATERN-F");
-        File paternO = new File(ManageFiles.getPath() + "Isoworlds-UTILS/Isoworlds-PATERN-O");
-        File paternV = new File(ManageFiles.getPath() + "Isoworlds-UTILS/Isoworlds-PATERN-V");
+        File utils = new File(ManageFiles.getPath() + "/Isoworlds-UTILS/");
+        File sas = new File(ManageFiles.getPath() + "/Isoworlds-UTILS/Isoworlds-SAS");
+        File patern = new File(ManageFiles.getPath() + "/Isoworlds-UTILS/Isoworlds-PATERN");
+        File paternF = new File(ManageFiles.getPath() + "/Isoworlds-UTILS/Isoworlds-PATERN-F");
+        File paternO = new File(ManageFiles.getPath() + "/Isoworlds-UTILS/Isoworlds-PATERN-O");
+        File paternV = new File(ManageFiles.getPath() + "/Isoworlds-UTILS/Isoworlds-PATERN-V");
 
         // Create main dir
         utils.mkdir();

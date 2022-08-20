@@ -81,7 +81,7 @@ public class Pull implements Consumer<ScheduledTask> {
         return Task.builder()
                 .execute(new Pull(pPlayer, file))
                 .interval(1, TimeUnit.SECONDS)
-                .plugin(Main.instance.pluginContainer)
+                .plugin(Main.instance.getContainer())
                 .build();
     }
 }

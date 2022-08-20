@@ -77,9 +77,6 @@ public class Main implements IMain {
     private IsoworldConfiguration config = null;
 
     @Inject
-    public static PluginContainer pluginContainer;
-
-    @Inject
     public Main(org.apache.logging.log4j.Logger logger, Game game, final PluginContainer container) {
         this.logger = logger;
         this.commonLogger = new common.Logger("sponge");
@@ -127,6 +124,9 @@ public class Main implements IMain {
         logger.info("[IW][CONFIG] main_worldname: " + this.config.mainWorld());
         logger.info("[IW][CONFIG] main_world_spawn_coordinate: " + this.config.mainWorldSpawnCoordinate());
         logger.info("[IW][CONFIG] inactivity_before_world_unload: " + this.config.modules().automaticUnload().inactivityTime());
+
+        logger.info("[IW] Enregistrement des events...");
+        registerEvents();
     }
 
 
@@ -134,9 +134,6 @@ public class Main implements IMain {
     @Listener
     public void onGameInit(StartingEngineEvent<Server> event) {
         //ConfigManager.load();
-
-        Logger.info("Enregistrement des events...");
-        registerEvents();
 
         // Create needed dirs
         Logger.info("Initialisation des répertoires...");
@@ -193,10 +190,10 @@ public class Main implements IMain {
         }
 
         // PlayTime
-        if (config.playTime()) {
+        /*if (config.playTime()) {
             // Start playtime task
             PlayTime.IncreasePlayTime();
-        }
+        }*/
 
         // *********************
 
@@ -220,8 +217,8 @@ public class Main implements IMain {
     }
 
     private void registerEvents() {
-        Sponge.eventManager().registerListeners(pluginContainer, new Listeners());
-        Sponge.eventManager().registerListeners(pluginContainer, new ChatListeners());
+        Sponge.eventManager().registerListeners(container, new Listeners());
+        Sponge.eventManager().registerListeners(container, new ChatListeners());
     }
 
     public Game getGame() {
@@ -280,5 +277,9 @@ public class Main implements IMain {
 
     public IsoworldConfiguration getConfig() {
         return config;
+    }
+
+    public PluginContainer getContainer() {
+        return this.container;
     }
 }

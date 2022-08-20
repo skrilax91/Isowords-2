@@ -3,7 +3,7 @@ package sponge.configuration;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 @ConfigSerializable
 public class DimensionAltConfig {
-    private boolean enable = false;
+    private boolean enable = true;
     private boolean mining = true;
     private boolean exploration = true;
 
