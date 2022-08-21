@@ -25,8 +25,8 @@
 package sponge.command.sub;
 
 import common.Cooldown;
-import sponge.Database.Methods.ChargeAction;
-import sponge.Database.Methods.TrustAction;
+import sponge.database.Methods.ChargeAction;
+import sponge.database.Methods.TrustAction;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandExecutor;
@@ -40,7 +40,7 @@ import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.biome.Biomes;
 import org.spongepowered.api.world.server.ServerLocation;
 import sponge.Main;
-import sponge.Translation.TranslateManager;
+import sponge.translation.TranslateManager;
 import sponge.util.action.StatAction;
 import sponge.util.message.Message;
 
@@ -99,7 +99,7 @@ public class BiomeCommand implements CommandExecutor {
         }
 
         // Check if actual world is an Isoworld
-        if (!pPlayer.world().properties().name().contains("-Isoworld")) {
+        if (!pPlayer.world().properties().name().contains("-isoworld")) {
             pPlayer.sendMessage(Message.error(translateManager.translate("NotInAIsoworld")));
             return CommandResult.success();
         }

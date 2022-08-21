@@ -65,8 +65,8 @@ public class StorageAction {
                 if (file2.exists()) {
                     Logger.warning(" --- Anomalie (@PUSHED: Dossier Isoworld et Isoworld tag tous deux présents pour: " + worldname + " ---");
                     // Déchargement au cas ou
-                    if (Sponge.server().worldManager().world(ResourceKey.brigadier(worldname)).isPresent()) {
-                        Sponge.server().worldManager().unloadWorld(Sponge.server().worldManager().world(ResourceKey.brigadier(worldname)).get());
+                    if (Sponge.server().worldManager().world(Main.instance.getWorldKey(worldname)).isPresent()) {
+                        Sponge.server().worldManager().unloadWorld(Sponge.server().worldManager().world(Main.instance.getWorldKey(worldname)).get());
                         Logger.warning(" --- Anomalie (@PUSHED: Déchargement du Isoworld anormalement chargé: " + worldname + " ---");
                     }
                     // Suppression du dossier
@@ -159,6 +159,7 @@ public class StorageAction {
             check.setString(1, plugin.servername);
             // Requête
             check.executeUpdate();
+            connection.close();
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -211,6 +212,6 @@ public class StorageAction {
         File file = new File(ManageFiles.getPath() + "/" + worldname + "@PUSHED");
         File file2 = new File(ManageFiles.getPath() + "/" + worldname);
         // If exists and contains Isoworld
-        return (file.exists() & file2.exists() & worldname.contains("-Isoworld"));
+        return (file.exists() & file2.exists() & worldname.contains("-isoworld"));
     }
 }

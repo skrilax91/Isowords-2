@@ -1,4 +1,4 @@
-package sponge.Translation.Default;
+package sponge.translation.Default;
 
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 

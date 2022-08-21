@@ -12,7 +12,7 @@ public class ChatListeners {
     @Listener
     public void onIsochat(PlayerChatEvent event, @First ServerPlayer sender) {
         if (IsoChat.isActivated(sender.uniqueId())) {
-            if (sender.world().properties().name().endsWith("-Isoworld")) {
+            if (sender.world().properties().name().endsWith("-isoworld")) {
                 event.setCancelled(true);
                 sender.world().players().forEach(p -> p.sendMessage(Component.text("[Isochat] " + sender.name() + ": " + event.originalMessage()).color(NamedTextColor.BLUE)));
             } else {

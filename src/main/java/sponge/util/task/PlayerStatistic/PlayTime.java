@@ -24,7 +24,7 @@
  */
 package sponge.util.task.PlayerStatistic;
 
-import sponge.Database.Methods.PlayTimeAction;
+import sponge.database.Methods.PlayTimeAction;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.scheduler.Task;

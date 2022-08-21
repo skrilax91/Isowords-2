@@ -37,7 +37,7 @@ import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import sponge.Main;
-import sponge.Translation.TranslateManager;
+import sponge.translation.TranslateManager;
 import sponge.util.inventory.MainInv;
 
 import java.util.ArrayList;

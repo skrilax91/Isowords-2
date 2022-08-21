@@ -36,14 +36,13 @@ import org.spongepowered.api.item.inventory.menu.ClickTypes;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
-import sponge.Database.Methods.IsoworldsAction;
+import sponge.database.Methods.IsoworldsAction;
 import sponge.Main;
-import sponge.Translation.TranslateManager;
+import sponge.translation.TranslateManager;
 import sponge.util.console.Logger;
 import sponge.util.inventory.MainInv;
 import sponge.util.inventory.build.sub.CreateInv;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,7 +87,7 @@ public class BuildInv {
             public boolean handle(Cause cause, Container container, Slot slot, int slotIndex, ClickType<?> clickType) {
                 if(clickType != ClickTypes.CLICK_LEFT.get() && clickType != ClickTypes.CLICK_RIGHT.get()) return false;
 
-                if (slotIndex == 1) {
+                if (slotIndex == 8) {
                     MainInv.closeOpenMenu(pPlayer, MainInv.menuPrincipal(pPlayer));
                     return false;
                 }

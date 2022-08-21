@@ -27,7 +27,6 @@ package sponge.util.inventory.weather;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.item.ItemTypes;
@@ -38,7 +37,7 @@ import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import sponge.Main;
-import sponge.Translation.TranslateManager;
+import sponge.translation.TranslateManager;
 import sponge.util.inventory.MainInv;
 
 import java.util.ArrayList;

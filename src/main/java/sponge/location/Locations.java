@@ -78,7 +78,7 @@ public class Locations {
     public static boolean teleport(ServerPlayer player, String worldname) {
 
         ServerLocation maxy;
-        Optional<ServerWorld> finalWorld = plugin.getGame().server().worldManager().world(ResourceKey.brigadier(worldname));
+        Optional<ServerWorld> finalWorld = plugin.getGame().server().worldManager().world(Main.instance.getWorldKey(worldname));
 
         if (finalWorld.isPresent()) {
             try {
@@ -123,14 +123,15 @@ public class Locations {
 
     private static void buildSafeSpawn(String worldname) {
 
-        Sponge.server().worldManager().loadWorld(ResourceKey.brigadier(worldname));
+        Sponge.server().worldManager().loadWorld(Main.instance.getWorldKey(worldname));
+        ServerWorld world = Sponge.server().worldManager().world(Main.instance.getWorldKey(worldname)).get();
 
         // Clear zone
         for (int x = -2; x < 2; x++) {
             for (int y = 60; y < 65; y++) {
                 for (int z = -2; z < 2; z++) {
-                    if (Sponge.server().worldManager().world(ResourceKey.brigadier(worldname)).get().block(x, y, x).type() != BlockTypes.BEDROCK.get()) {
-                        Sponge.server().worldManager().world(ResourceKey.brigadier(worldname)).get().setBlock(x, y, z, BlockState.builder().blockType(BlockTypes.AIR).build());
+                    if (world.block(x, y, x).type() != BlockTypes.BEDROCK.get()) {
+                        world.setBlock(x, y, z, BlockState.builder().blockType(BlockTypes.AIR).build());
                     }
                 }
             }
@@ -139,7 +140,7 @@ public class Locations {
         // Build safe zone
         for (int x = -2; x < 2; x++) {
             for (int z = -2; z < 2; z++) {
-                Sponge.server().worldManager().world(ResourceKey.brigadier(worldname)).get().setBlock(x, 60, z, BlockState.builder().blockType(BlockTypes.BEDROCK).build());
+                world.setBlock(x, 60, z, BlockState.builder().blockType(BlockTypes.BEDROCK).build());
             }
         }
 

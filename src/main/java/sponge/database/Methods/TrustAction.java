@@ -22,11 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package sponge.Database.Methods;
+package sponge.database.Methods;
 
-import common.Manager;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import sponge.Database.MysqlHandler;
+import sponge.database.MysqlHandler;
 import sponge.Main;
 
 import java.sql.Connection;
@@ -66,7 +65,7 @@ public class TrustAction {
     /**
      * <p> Get all Trusted player of an isoword
      *
-     * @param worldName The world name (can be without -Isoworld)
+     * @param worldName The world name (can be without -isoworld)
      * @return {@link ResultSet} of all player
      */
     public static ResultSet getTrusts(String worldName) {
@@ -76,8 +75,8 @@ public class TrustAction {
             PreparedStatement check = connection.prepareStatement(CHECK);
 
             // World name
-            if (!worldName.contains("-Isoworld"))
-                worldName = (worldName + "-Isoworld");
+            if (!worldName.contains("-isoworld"))
+                worldName = (worldName + "-isoworld");
 
 
             check.setString(1, worldName);
@@ -101,13 +100,13 @@ public class TrustAction {
      * @return whether the function was successful or not
      */
     public static Boolean setTrust(ServerPlayer ply) {
-        return setTrust(ply.uniqueId() + "-Isoworld", ply);
+        return setTrust(ply.uniqueId().toString() + "-isoworld", ply);
     }
 
     /**
      * <p> add trusted player to isoworld
      *
-     * @param worldName The world name (can be without -Isoworld)
+     * @param worldName The world name (can be without -isoworld)
      * @param ply The player
      * @return whether the function was successful or not
      */
@@ -122,8 +121,8 @@ public class TrustAction {
             // Player uuid
             insert.setString(1, ply.uniqueId().toString());
             // World name
-            if (!worldName.contains("-Isoworld"))
-                worldName = (worldName + "-Isoworld");
+            if (!worldName.contains("-isoworld"))
+                worldName = (worldName + "-isoworld");
 
             insert.setString(2, worldName);
             // Date
@@ -141,7 +140,7 @@ public class TrustAction {
     /**
      * Delete player from trusted list on specific IsoWorld
      *
-     * @param worldName The name of the IsoWorld (can be without -Isoworld)
+     * @param worldName The name of the IsoWorld (can be without -isoworld)
      * @param ply The player to remove
      * @return {@link Boolean}
      */
@@ -152,8 +151,8 @@ public class TrustAction {
             PreparedStatement delete_autorisations = connection.prepareStatement(DELETE_AUTORISATIONS);
 
             // World name
-            if (!worldName.contains("-Isoworld"))
-                worldName += "-Isoworld";
+            if (!worldName.contains("-isoworld"))
+                worldName += "-isoworld";
 
             // delete autorisation
             delete_autorisations.setString(1, ply.uniqueId().toString());
@@ -173,7 +172,7 @@ public class TrustAction {
      * Check if a player is trusted on specific IsoWorld
      *
      * @param ply The player to check
-     * @param worldName The name of the IsoWorld (can be without -Isoworld)
+     * @param worldName The name of the IsoWorld (can be without -isoworld)
      * @return {@link Boolean}
      */
     public static Boolean isTrusted(ServerPlayer ply, String worldName) {
@@ -185,8 +184,8 @@ public class TrustAction {
             // Player uuid
             check.setString(1, ply.uniqueId().toString());
             // World name
-            if (!worldName.contains("-Isoworld"))
-                worldName += "-Isoworld";
+            if (!worldName.contains("-isoworld"))
+                worldName += "-isoworld";
 
             check.setString(2, worldName);
             check.setString(3, Main.instance.servername);

@@ -27,6 +27,7 @@ package sponge;
 import com.google.inject.Inject;
 import common.*;
 
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.event.lifecycle.*;
 import org.spongepowered.configurate.CommentedConfigurationNode;
@@ -42,12 +43,13 @@ import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 
-import sponge.Database.MysqlHandler;
-import sponge.Translation.TranslateManager;
+import sponge.database.MysqlHandler;
+import sponge.translation.TranslateManager;
 import sponge.command.Commands;
 import sponge.configuration.IsoworldConfiguration;
 import sponge.listener.ChatListeners;
 import sponge.listener.Listeners;
+import sponge.util.WorldManager;
 import sponge.util.action.DimsAltAction;
 import sponge.util.action.StorageAction;
 import sponge.util.console.Logger;
@@ -161,6 +163,9 @@ public class Main implements IMain {
 
     @Listener
     public void onPostInit(StartedEngineEvent<Server> event) {
+
+        Logger.info("Preparing patterns for isoworlds...");
+        WorldManager.initPatternWorlds();
         // ****** MODULES ******
 
         // IsoWorlds-SAS move iw to folder sas
@@ -243,5 +248,10 @@ public class Main implements IMain {
 
     public PluginContainer getContainer() {
         return this.container;
+    }
+
+    public ResourceKey getWorldKey(String worldName)
+    {
+        return ResourceKey.builder().namespace(container).value(worldName).build();
     }
 }

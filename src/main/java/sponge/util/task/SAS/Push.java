@@ -75,7 +75,7 @@ public class Push implements Runnable {
         // Boucle de tous les mondes
         for (ServerWorld world : Sponge.server().worldManager().worlds()) {
             // Si le monde est chargé et contient Isoworld
-            if (world.isLoaded() & world.properties().name().contains("-Isoworld")) {
+            if (world.isLoaded() & world.properties().name().contains("-isoworld")) {
 
                 // Si le nombre de joueurs == 0
                 if (world.players().isEmpty()) {
@@ -95,7 +95,7 @@ public class Push implements Runnable {
 
                         // Sauvegarde du monde et déchargement
                             /*try {
-                                Sponge.server().worldManager().world(ResourceKey.brigadier(world.properties().name())).get().save();
+                                Sponge.server().worldManager().world(Main.instance.getWorldKey(world.properties().name())).get().save();
                             } catch (IOException e) {
                                 e.printStackTrace();
                                 continue;
@@ -107,7 +107,7 @@ public class Push implements Runnable {
                             // If is mirrored then unload + remove then return
                             if (StorageAction.isMirrored(world)) {
                                 Logger.severe("--- Anomalie détectée, unload interrompu et suppression de l'anomalie: " + world.properties().name() + " ---");
-                                Sponge.server().worldManager().deleteWorld(ResourceKey.brigadier(world.properties().name()));
+                                Sponge.server().worldManager().deleteWorld(Main.instance.getWorldKey(world.properties().name()));
                                 Logger.severe("--- Anomalie: Corrigée, suppression effectuée avec succès de l'Isoworld: " + world.properties().name() + " ---");
                                 continue;
                             } else if (!Sponge.server().worldManager().unloadWorld(world).get()) {
@@ -147,7 +147,7 @@ public class Push implements Runnable {
 
                             // Suppression du monde
                             try {
-                                if (Sponge.server().worldManager().deleteWorld(ResourceKey.brigadier(world.properties().name())).get()) {
+                                if (Sponge.server().worldManager().deleteWorld(Main.instance.getWorldKey(world.properties().name())).get()) {
                                     Logger.info("- " + world.properties().name() + " : Isoworld supprimé avec succès !");
                                 }
                             } catch (InterruptedException | ExecutionException e) {

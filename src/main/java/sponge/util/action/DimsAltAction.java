@@ -106,7 +106,7 @@ public class DimsAltAction {
                 setId(dim);
 
                 // Load world
-                Sponge.server().worldManager().loadWorld(ResourceKey.brigadier(dim));
+                Sponge.server().worldManager().loadWorld(plugin.getWorldKey(dim));
             }
         }
     }
@@ -115,7 +115,7 @@ public class DimsAltAction {
         // Create world properties Isoworlds
 
         // Check si world properties en place, création else
-        CompletableFuture<Optional<ServerWorldProperties>> fwp = Sponge.server().worldManager().loadProperties(ResourceKey.brigadier(worldname));
+        CompletableFuture<Optional<ServerWorldProperties>> fwp = Sponge.server().worldManager().loadProperties(plugin.getWorldKey(worldname));
         ServerWorldProperties worldProperties;
 
         try {
@@ -131,8 +131,9 @@ public class DimsAltAction {
                 worldProperties.setPvp(false);
 
                 Sponge.server().worldManager().saveProperties(worldProperties);
+                Sponge.server().worldManager().saveProperties(worldProperties);
                 // Border
-                Optional<ServerWorld> world = Sponge.server().worldManager().world(ResourceKey.brigadier(worldname));
+                Optional<ServerWorld> world = Sponge.server().worldManager().world(plugin.getWorldKey(worldname));
                 world.ifPresent(serverWorld -> serverWorld.setBorder(WorldBorder.builder().center(0, 0).targetDiameter(6000).build()));
                 Logger.warning("Border nouveau: " + 6000);
             } else {
@@ -143,13 +144,13 @@ public class DimsAltAction {
                         .gameMode(GameModes.SURVIVAL)
                         .loadOnStartup(true)
                         .performsSpawnLogic(false)
-                        .key(ResourceKey.brigadier(worldname))
+                        .key(plugin.getWorldKey(worldname))
                         .pvp(false)
                         .build();
                 sponge.util.console.Logger.info("WOLRD PROPERTIES: non présents, création...");
                 Sponge.server().worldManager().loadWorld(template);
 
-                Optional<ServerWorld> world = Sponge.server().worldManager().world(ResourceKey.brigadier(worldname));
+                Optional<ServerWorld> world = Sponge.server().worldManager().world(plugin.getWorldKey(worldname));
                 world.ifPresent(serverWorld -> serverWorld.setBorder(WorldBorder.builder().center(0, 0).targetDiameter(6000).build()));
                 Logger.warning("Border nouveau: " + 6000);
             }

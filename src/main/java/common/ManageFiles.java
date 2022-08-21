@@ -24,6 +24,8 @@
  */
 package common;
 
+import sponge.Main;
+
 import java.io.*;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
@@ -36,6 +38,8 @@ import java.util.Objects;
 public class ManageFiles {
 
     public static void copyFileOrFolder(File source, File dest, CopyOption... options) throws IOException {
+        Main.instance.getLogger().info("Copying file : " + source.getPath());
+        Main.instance.getLogger().info("Destina file : " + dest.getPath());
         if (source.isDirectory())
             copyFolder(source, dest, options);
         else {
@@ -107,7 +111,7 @@ public class ManageFiles {
             return dirs;
 
         for (File file : Objects.requireNonNull(currDir.listFiles())) {
-            if (file.isDirectory() & file.getName().contains("-Isoworld")) {
+            if (file.isDirectory() & file.getName().contains("-isoworld")) {
                 dirs.add(file);
             }
         }
@@ -140,7 +144,7 @@ public class ManageFiles {
 
     // Récupération du chemin racine
     public static String getPath() {
-        Path path = Paths.get((System.getProperty("user.dir") + "/Isolonice/"));
+        Path path = Paths.get((System.getProperty("user.dir") + "/" + Main.instance.getConfig().mainWorld() + "/dimensions/" + Main.instance.getContainer().metadata().id().toString()));
         if (!Files.exists(path)) {
             try {
                 Files.createDirectory(path);

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package sponge.Database;
+package sponge.database;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.sql.SqlManager;

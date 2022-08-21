@@ -25,7 +25,7 @@
 package sponge.command.sub;
 
 import common.Cooldown;
-import sponge.Database.Methods.TrustAction;
+import sponge.database.Methods.TrustAction;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandExecutor;
@@ -33,12 +33,12 @@ import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import sponge.Database.Methods.IsoworldsAction;
+import sponge.database.Methods.IsoworldsAction;
 import sponge.Main;
 
 import org.spongepowered.api.command.CommandResult;
 
-import sponge.Translation.TranslateManager;
+import sponge.translation.TranslateManager;
 import sponge.util.action.StatAction;
 import sponge.util.message.Message;
 

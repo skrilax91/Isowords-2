@@ -25,9 +25,9 @@
 package common;
 
 import org.spongepowered.api.entity.living.player.Player;
-import sponge.Database.MysqlHandler;
+import sponge.database.MysqlHandler;
 import sponge.Main;
-import sponge.Translation.TranslateManager;
+import sponge.translation.TranslateManager;
 import sponge.util.message.Message;
 
 import java.sql.Connection;

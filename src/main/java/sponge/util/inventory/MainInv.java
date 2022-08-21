@@ -25,27 +25,22 @@
 package sponge.util.inventory;
 
 import common.IsoChat;
-import org.spongepowered.api.item.inventory.menu.handler.CloseHandler;
-import sponge.Database.Methods.ChargeAction;
-import sponge.Database.Methods.PlayTimeAction;
+import sponge.database.Methods.ChargeAction;
+import sponge.database.Methods.PlayTimeAction;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.*;
-import org.spongepowered.api.item.inventory.menu.ClickType;
 import org.spongepowered.api.item.inventory.menu.ClickTypes;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
-import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.scheduler.Task;
 import sponge.Main;
-import sponge.Translation.TranslateManager;
+import sponge.translation.TranslateManager;
 import sponge.location.Locations;
 import sponge.util.console.Logger;
 import sponge.util.inventory.biome.BiomeInv;
@@ -58,7 +53,6 @@ import sponge.util.inventory.weather.WeatherInv;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class MainInv {
@@ -154,8 +148,6 @@ public class MainInv {
         menu.registerSlotClick((cause, container, slot, slotIndex, clickType) -> {
             if(clickType != ClickTypes.CLICK_LEFT.get() && clickType != ClickTypes.CLICK_RIGHT.get()) return false;
 
-            Main.instance.getLogger().info("TESTTTTTTTT 1");
-
             switch (slotIndex) {
                 case 0: closeOpenMenu(pPlayer, BuildInv.getInv(pPlayer));
                     break;
@@ -179,16 +171,10 @@ public class MainInv {
                 default:
                     return false;
             }
-            Main.instance.getLogger().info("TESTTTTTTTT 2");
             return false;
         });
 
-        Main.instance.getLogger().info("TESTTTTTTTT 3");
-
         menu.registerClose((cause, container) -> menu.unregisterAll());
-
-        Main.instance.getLogger().info("TESTTTTTTTT 4");
-
         return menu;
     }
 

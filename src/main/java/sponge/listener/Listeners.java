@@ -26,11 +26,9 @@ package sponge.listener;
 
 import common.ManageFiles;
 import net.kyori.adventure.text.Component;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
@@ -44,8 +42,8 @@ import org.spongepowered.api.event.world.UnloadWorldEvent;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
-import sponge.Database.Methods.IsoworldsAction;
-import sponge.Translation.TranslateManager;
+import sponge.database.Methods.IsoworldsAction;
+import sponge.translation.TranslateManager;
 import sponge.location.Locations;
 import sponge.util.console.Logger;
 import sponge.Main;
@@ -70,12 +68,12 @@ public class Listeners {
     @Listener
     public void onRespawnPlayerEvent(RespawnPlayerEvent event) {
         ServerPlayer p = event.entity();
-        String worldname = (p.uniqueId() + "-Isoworld");
+        String worldname = (p.uniqueId().toString() + "-isoworld");
 
         // Teleport to spawn of own Isoworld if is loaded
-        if (Sponge.server().worldManager().world(ResourceKey.brigadier(worldname)).isPresent() && Sponge.server().worldManager().world(ResourceKey.brigadier(worldname)).get().isLoaded()) {
+        if (Sponge.server().worldManager().world(Main.instance.getWorldKey(worldname)).isPresent() && Sponge.server().worldManager().world(Main.instance.getWorldKey(worldname)).get().isLoaded()) {
             Sponge.asyncScheduler().submit(Task.builder().plugin(Main.instance.getContainer()).execute(() -> Locations.teleport(p, worldname)).delay(2, TimeUnit.MILLISECONDS).build());
-        } else if (Sponge.server().worldManager().world(ResourceKey.brigadier("Isolonice")).isPresent()) {
+        } else if (Sponge.server().worldManager().world(Main.instance.getWorldKey("Isolonice")).isPresent()) {
             Sponge.asyncScheduler().submit(Task.builder().plugin(Main.instance.getContainer()).execute(() -> Locations.teleport(p, "Isolonice")).delay(2, TimeUnit.MILLISECONDS).build());
         }
     }
@@ -110,7 +108,7 @@ public class Listeners {
     @Listener
     public void onStop(StoppingEngineEvent<Server> event) {
         Collection<ServerPlayer> players = Sponge.server().onlinePlayers();
-        ServerWorld spawnWorld = Sponge.server().worldManager().world(ResourceKey.brigadier("Isolonice")).get();
+        ServerWorld spawnWorld = Sponge.server().worldManager().world(Main.instance.getWorldKey("Isolonice")).get();
         ServerLocation spawn = ServerLocation.of(spawnWorld, spawnWorld.properties().spawnPosition());
         ServerLocation top = Locations.getHighestLoc(spawn).orElse(ServerLocation.of(spawn.world(), Locations.getAxis("Isolonice").x(), 61, Locations.getAxis("Isolonice").z()));
 
@@ -124,13 +122,8 @@ public class Listeners {
     public void onConnect(ServerSideConnectionEvent.Join event) {
         // Welcome message and open menu for those who do not have their own Isoworld
         if (!IsoworldsAction.iwExists(event.player().uniqueId().toString())) {
-            Sponge.asyncScheduler().submit(Task.builder().plugin(Main.instance.getContainer()).execute(() -> {
+            Sponge.server().scheduler().submit(Task.builder().plugin(Main.instance.getContainer()).execute(() -> {
                 event.player().sendMessage(Message.success(translateManager.translate("FirstJoin")));
-                try {
-                    Sponge.server().commandManager().process(event.player(), "iw");
-                } catch (CommandException e) {
-                    throw new RuntimeException(e);
-                }
             }).delay(5, TimeUnit.SECONDS).build());
         }
     }
@@ -138,9 +131,9 @@ public class Listeners {
     @Listener
     public void onLogin(ServerSideConnectionEvent.Login event) {
         String worldname = Main.instance.getConfig().mainWorld();
-        Sponge.asyncScheduler().submit(Task.builder()
+        Sponge.server().scheduler().submit(Task.builder()
                 .plugin(Main.instance.getContainer())
-                .execute(() -> event.setToLocation(ServerLocation.of(ResourceKey.brigadier(worldname), 0, 60, 0)))
+                .execute(() -> event.setToLocation(ServerLocation.of(Main.instance.getWorldKey(worldname), 0, 60, 0)))
                 .delay(1 / 5, TimeUnit.SECONDS)
                 .build());
     }
@@ -148,7 +141,7 @@ public class Listeners {
     // Logout event, tp spawn
     @Listener
     public void onLogout(ServerSideConnectionEvent.Disconnect event) {
-        ServerWorld spawnWorld = Sponge.server().worldManager().world(ResourceKey.brigadier("Isolonice")).get();
+        ServerWorld spawnWorld = Sponge.server().worldManager().world(Main.instance.getWorldKey("Isolonice")).get();
         ServerLocation spawn = ServerLocation.of(spawnWorld, spawnWorld.properties().spawnPosition());
         ServerLocation top = Locations.getHighestLoc(spawn).orElse(ServerLocation.of(spawn.world(), Locations.getAxis("Isolonice").x(), 61, Locations.getAxis("Isolonice").z()));
         event.player().setLocation(top);
@@ -174,7 +167,7 @@ public class Listeners {
                 Logger.severe("--- Le joueur " + p.name() + " fait partie de l'anomalie ---");
             }
             // Déchargement et suppression
-            Sponge.server().worldManager().deleteWorld(ResourceKey.brigadier(worldname));
+            Sponge.server().worldManager().deleteWorld(Main.instance.getWorldKey(worldname));
         } else {
             Logger.info("LOADING " + worldname + " WORLD, CAUSED BY: " + event.cause().toString());
         }
@@ -183,10 +176,10 @@ public class Listeners {
     // TP lors du unload d'un monde
     @Listener
     public void onUnloadWorld(UnloadWorldEvent event) {
-        String worldname = ("Isolonice");
+        String worldname = Main.instance.getConfig().mainWorld();
         ServerWorld world = event.world();
 
-        ServerWorld spawnWorld = Sponge.server().worldManager().world(ResourceKey.brigadier(worldname)).get();
+        ServerWorld spawnWorld = Sponge.server().worldManager().world(Main.instance.getWorldKey(worldname)).get();
         ServerLocation spawn = ServerLocation.of(spawnWorld, spawnWorld.properties().spawnPosition());
         ServerLocation top = Locations.getHighestLoc(spawn).orElse(ServerLocation.of(spawn.world(), Locations.getAxis(worldname).x(), 61, Locations.getAxis(worldname).z()));
 
@@ -199,7 +192,7 @@ public class Listeners {
         // Check if file exist, to detect mirrors
         File file = new File(ManageFiles.getPath() + "/" + world.properties().name() + "@PUSHED");
         // If exists and contains Isoworld
-        if (file.exists() & world.properties().name().contains("-Isoworld")) {
+        if (file.exists() & world.properties().name().contains("-isoworld")) {
             // Anomalie
             Logger.severe("--- Anomalie: UNLOADING " + world.properties().name() + " WORLD, CAUSED BY: " + event.cause().toString() + " ---");
             // Check if players in there
@@ -231,9 +224,9 @@ public class Listeners {
             return;
         }
 
-        Sponge.server().worldManager().loadWorld(ResourceKey.brigadier(eventworld));
+        Sponge.server().worldManager().loadWorld(Main.instance.getWorldKey(eventworld));
 
-        if (eventworld.contains("-Isoworld")) {
+        if (eventworld.contains("-isoworld")) {
             try {
                 Connection connection = plugin.database.getConnection();
                 PreparedStatement check = connection.prepareStatement(CHECK);
@@ -282,7 +275,7 @@ public class Listeners {
 
 //    @Listener
 //    public void onChunkPregen(ChunkPreGenerationEvent.Pre event) {
-//        if (event.getTargetWorld().getName().contains("-Isoworld")) {
+//        if (event.getTargetWorld().getName().contains("-isoworld")) {
 //            event.getChunkPreGenerate().cancel();
 //        }
 //    }

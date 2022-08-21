@@ -27,7 +27,6 @@ package sponge.command.sub;
 import common.Cooldown;
 import common.ManageFiles;
 import net.kyori.adventure.text.Component;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.exception.CommandException;
@@ -35,12 +34,12 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
-import sponge.Database.Methods.IsoworldsAction;
+import sponge.database.Methods.IsoworldsAction;
 import sponge.Main;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
-import sponge.Translation.TranslateManager;
+import sponge.translation.TranslateManager;
 import sponge.util.action.StatAction;
 import sponge.util.message.Message;
 
@@ -73,7 +72,7 @@ public class ReforgeCommand implements CommandExecutor {
         }
 
         // Check is Isoworld exists in database
-        if (!sponge.Database.Methods.IsoworldsAction.isPresent(pPlayer, false)) {
+        if (!sponge.database.Methods.IsoworldsAction.isPresent(pPlayer, false)) {
             pPlayer.sendMessage(Message.error(translateManager.translate("IsoworldNotFound")));
             return CommandResult.success();
         }
@@ -95,23 +94,23 @@ public class ReforgeCommand implements CommandExecutor {
 
         confirm.remove(pPlayer.uniqueId().toString());
 
-        worldname = (pPlayer.uniqueId() + "-Isoworld");
-        ServerWorld spawnWorld = Sponge.server().worldManager().world(ResourceKey.brigadier("Isolonice")).get();
+        worldname = (pPlayer.uniqueId().toString() + "-isoworld");
+        ServerWorld spawnWorld = Sponge.server().worldManager().world(Main.instance.getWorldKey("Isolonice")).get();
         File destDir = new File(ManageFiles.getPath() + "/Isoworlds-REFONTE/" + worldname);
         destDir.mkdir();
 
-        if (!Sponge.server().worldManager().world(ResourceKey.brigadier(worldname)).isPresent()) {
+        if (!Sponge.server().worldManager().world(Main.instance.getWorldKey(worldname)).isPresent()) {
             pPlayer.sendMessage(Message.error(translateManager.translate("IsoworldNotFound")));
             return CommandResult.success();
         }
-        if (Sponge.server().worldManager().world(ResourceKey.brigadier(worldname)).get().isLoaded()) {
-            Collection<ServerPlayer> colPlayers = Sponge.server().worldManager().world(ResourceKey.brigadier(worldname)).get().players();
+        if (Sponge.server().worldManager().world(Main.instance.getWorldKey(worldname)).get().isLoaded()) {
+            Collection<ServerPlayer> colPlayers = Sponge.server().worldManager().world(Main.instance.getWorldKey(worldname)).get().players();
 
             for (ServerPlayer player : colPlayers) {
                 player.setLocation(ServerLocation.of(spawnWorld, spawnWorld.properties().spawnPosition()));
                 pPlayer.sendMessage(Message.error(translateManager.translate("ReforgeKick")));
             }
-            Sponge.server().worldManager().unloadWorld(Sponge.server().worldManager().world(ResourceKey.brigadier(worldname)).get());
+            Sponge.server().worldManager().unloadWorld(Sponge.server().worldManager().world(Main.instance.getWorldKey(worldname)).get());
         }
 
         try {
@@ -123,7 +122,7 @@ public class ReforgeCommand implements CommandExecutor {
             throw new RuntimeException(e);
         }
         // Deleting isoworld
-        Sponge.server().worldManager().deleteWorld(ResourceKey.brigadier(worldname));
+        Sponge.server().worldManager().deleteWorld(Main.instance.getWorldKey(worldname));
 
         pPlayer.sendMessage(Message.success(translateManager.translate("SuccesReforge")));
 

@@ -33,9 +33,9 @@ import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import sponge.Database.Methods.IsoworldsAction;
+import sponge.database.Methods.IsoworldsAction;
 import sponge.Main;
-import sponge.Translation.TranslateManager;
+import sponge.translation.TranslateManager;
 import sponge.location.Locations;
 
 import org.spongepowered.api.command.CommandResult;
@@ -60,7 +60,7 @@ public class HomeCommand implements CommandExecutor {
         } else {
             throw new CommandException(Message.error("Your are not a player."));
         }
-        worldname = (pPlayer.uniqueId() + "-Isoworld");
+        worldname = (pPlayer.uniqueId().toString() + "-isoworld");
 
         //If return true then the command is in lock
         if (!instance.cooldown.isAvailable(pPlayer, Cooldown.MAISON)) {

@@ -71,7 +71,7 @@ public class ListWorldsCommand implements CommandExecutor {
 
         for(ServerWorld world : Sponge.server().worldManager().worlds()) {
             if (world.isLoaded()) {
-                if (world.properties().displayName().toString().contains("-Isoworld")) {
+                if (world.properties().displayName().toString().contains("-isoworld")) {
                     worlds.add(world);
                 }
             }
@@ -89,7 +89,7 @@ public class ListWorldsCommand implements CommandExecutor {
 
         for(ServerWorld w : worlds ) {
             String worldName = w.properties().name();
-            UUID uuid = UUID.fromString(worldName.split("-Isoworld")[0]);
+            UUID uuid = UUID.fromString(worldName.split("-isoworld")[0]);
             String pname;
             String status;
 

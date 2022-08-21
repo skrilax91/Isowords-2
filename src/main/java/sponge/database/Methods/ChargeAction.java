@@ -22,10 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package sponge.Database.Methods;
+package sponge.database.Methods;
 
 import common.Manager;
-import sponge.Database.MysqlHandler;
+import sponge.database.MysqlHandler;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import java.sql.Connection;

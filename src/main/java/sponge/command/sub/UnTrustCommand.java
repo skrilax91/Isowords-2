@@ -25,9 +25,8 @@
 package sponge.command.sub;
 
 import common.Cooldown;
-import sponge.Database.Methods.TrustAction;
+import sponge.database.Methods.TrustAction;
 import net.kyori.adventure.text.Component;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.exception.CommandException;
@@ -36,7 +35,7 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
-import sponge.Database.Methods.IsoworldsAction;
+import sponge.database.Methods.IsoworldsAction;
 import sponge.Main;
 
 import org.spongepowered.api.Sponge;
@@ -44,7 +43,7 @@ import org.spongepowered.api.command.CommandResult;
 
 import org.spongepowered.api.entity.living.player.User;
 
-import sponge.Translation.TranslateManager;
+import sponge.translation.TranslateManager;
 import sponge.util.action.StatAction;
 import sponge.util.message.Message;
 
@@ -115,8 +114,8 @@ public class UnTrustCommand implements CommandExecutor {
 
         try {
             if (target.isOnline()) {
-                ServerWorld spawnWorld = Sponge.server().worldManager().world(ResourceKey.brigadier("Isolonice")).get();
-                if (target.player().get().world().properties().name().equals(pPlayer.uniqueId().toString() + "-Isoworld")) {
+                ServerWorld spawnWorld = Sponge.server().worldManager().world(Main.instance.getWorldKey("Isolonice")).get();
+                if (target.player().get().world().properties().name().equals(pPlayer.uniqueId().toString() + "-isoworld")) {
                     target.player().get().setLocation(ServerLocation.of(spawnWorld, spawnWorld.properties().spawnPosition()));
                     pPlayer.sendMessage(Message.error(translateManager.translate("NotTrusted")));
                 }

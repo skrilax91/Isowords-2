@@ -24,7 +24,7 @@
  */
 package common;
 
-import sponge.Database.MysqlHandler;
+import sponge.database.MysqlHandler;
 
 import java.util.Map;
 

@@ -37,7 +37,7 @@ import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import sponge.Main;
-import sponge.Translation.TranslateManager;
+import sponge.translation.TranslateManager;
 import sponge.util.inventory.MainInv;
 import sponge.util.inventory.build.BuildInv;
 
@@ -101,13 +101,13 @@ public class CreateInv {
                 if(clickType != ClickTypes.CLICK_LEFT.get() && clickType != ClickTypes.CLICK_RIGHT.get()) return false;
 
                 switch (slotIndex) {
-                    case 0: MainInv.commandMenu(pPlayer, "iw c n");
+                    case 0: MainInv.commandMenu(pPlayer, "iw c normal");
                         break;
-                    case 1: MainInv.commandMenu(pPlayer, "iw c v");
+                    case 1: MainInv.commandMenu(pPlayer, "iw c void");
                         break;
-                    case 2: MainInv.commandMenu(pPlayer, "iw c o");
+                    case 2: MainInv.commandMenu(pPlayer, "iw c ocean");
                         break;
-                    case 3: MainInv.commandMenu(pPlayer, "iw c f");
+                    case 3: MainInv.commandMenu(pPlayer, "iw c flat");
                         break;
                     case 8: MainInv.closeOpenMenu(pPlayer, BuildInv.getInv(pPlayer));
                         break;

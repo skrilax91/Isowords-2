@@ -22,17 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package sponge.Database.Methods;
+package sponge.database.Methods;
 
-import common.Manager;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import sponge.Database.MysqlHandler;
+import sponge.database.MysqlHandler;
 import sponge.Main;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
 public class PlayTimeAction {
 

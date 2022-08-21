@@ -35,11 +35,12 @@ import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import sponge.Database.Methods.IsoworldsAction;
+import sponge.database.Methods.IsoworldsAction;
 import sponge.Main;
-import sponge.Translation.TranslateManager;
+import sponge.translation.TranslateManager;
+import sponge.util.WorldManager;
 import sponge.util.message.Message;
-import sponge.Database.Methods.TrustAction;
+import sponge.database.Methods.TrustAction;
 import sponge.location.Locations;
 import common.ManageFiles;
 
@@ -50,7 +51,8 @@ import java.io.*;
 import java.sql.SQLException;
 
 public class CreateCommand implements CommandExecutor {
-    private static TranslateManager translateManager = Main.instance.translateManager;
+    private static final TranslateManager translateManager = Main.instance.translateManager;
+    private static final Parameter.Key<String> worldType = Parameter.key("type", String.class);
 
     @Override
     public CommandResult execute(CommandContext context) throws CommandException {
@@ -72,20 +74,17 @@ public class CreateCommand implements CommandExecutor {
             return CommandResult.success();
         }
 
-        // Create message
-        pPlayer.sendMessage(Message.success(translateManager.translate("CreatingIsoworld")));
-
-        fullPath = (ManageFiles.getPath() + pPlayer.uniqueId() + "-Isoworld");
-        worldName = (pPlayer.user().profile().uuid() + "-Isoworld");
+        worldName = (pPlayer.uniqueId().toString() + "-isoworld");
+        fullPath = (ManageFiles.getPath() + "/" +  worldName);
 
         // Check properties exists
-        if (Sponge.server().worldManager().worldExists(ResourceKey.brigadier(worldName))) {
+        if (Sponge.server().worldManager().worldExists(Main.instance.getWorldKey(worldName))) {
             pPlayer.sendMessage(Message.error(translateManager.translate("IsoworldAlreadyExists")));
             return CommandResult.success();
         }
 
         // Check arg lenght en send patern types message
-        if (!context.hasAny(Parameter.key("type", char.class))) {
+        if (!context.hasAny(worldType)) {
             pPlayer.sendMessage(Message.error(translateManager.translate("HeaderIsoworld")));
             pPlayer.sendMessage(Message.error(translateManager.translate("SpaceLine")));
             pPlayer.sendMessage(Message.error(translateManager.translate("PaternTypes")));
@@ -94,42 +93,22 @@ public class CreateCommand implements CommandExecutor {
             return CommandResult.success();
         }
 
-        char result = context.requireOne(Parameter.key("type", char.class));
-        File sourceFile;
-        switch (result) {
-            case 'n':
-                sourceFile = new File(ManageFiles.getPath() + "Isoworlds-UTILS/Isoworlds-PATERN/");
-                break;
-            case 'v':
-                sourceFile = new File(ManageFiles.getPath() + "Isoworlds-UTILS/Isoworlds-PATERN-V/");
-                break;
-            case 'o':
-                sourceFile = new File(ManageFiles.getPath() + "Isoworlds-UTILS/Isoworlds-PATERN-O/");
-                break;
-            case 'f':
-                sourceFile = new File(ManageFiles.getPath() + "Isoworlds-UTILS/Isoworlds-PATERN-F/");
-                break;
-            default:
-                return CommandResult.success();
-        }
+        // Create message
+        pPlayer.sendMessage(Message.success(translateManager.translate("CreatingIsoworld")));
+        String result = context.requireOne(worldType);
 
-        File destFile = new File(fullPath);
-
-        try {
-            ManageFiles.copyFileOrFolder(sourceFile, destFile);
-        } catch (IOException ie) {
-            ie.printStackTrace();
-            return CommandResult.success();
-        }
+        WorldManager.createWorld(worldName);
+        Sponge.server().worldManager().copyWorld(Main.instance.getWorldKey(worldName), Main.instance.getWorldKey(result + "-pattern"));
 
         //  Create world properties
         IsoworldsAction.setWorldProperties(worldName, pPlayer);
+        ResourceKey worldKey = Main.instance.getWorldKey(worldName);
 
         try {
             if (IsoworldsAction.addIsoworld(pPlayer)) {
                 if (TrustAction.setTrust(pPlayer)) {
                     // Loading
-                    Sponge.game().server().worldManager().loadWorld(ResourceKey.brigadier(worldName));
+                    Sponge.game().server().worldManager().loadWorld(worldKey);
 
                     pPlayer.sendMessage(Message.success(translateManager.translate("IsoworldsuccessCreate")));
 
@@ -141,6 +120,7 @@ public class CreateCommand implements CommandExecutor {
                 }
             }
         } catch (SQLException e) {
+            pPlayer.sendMessage(Message.success("An error occurred"));
             throw new RuntimeException(e);
         }
         return CommandResult.success();
@@ -151,7 +131,7 @@ public class CreateCommand implements CommandExecutor {
         return Command.builder()
                 .shortDescription(Component.text("Permer de créer un isoworld"))
                 .permission("Isoworlds.create")
-                .addParameter(Parameter.choices("n", "v", "o", "f").key("type").build())
+                .addParameter(Parameter.choices("normal", "flat", "ocean", "void").key(worldType).build())
                 .executor(new CreateCommand())
                 .build();
     }

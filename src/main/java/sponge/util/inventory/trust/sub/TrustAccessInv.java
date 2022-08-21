@@ -25,10 +25,9 @@
 package sponge.util.inventory.trust.sub;
 
 import common.Cooldown;
-import sponge.Database.Methods.TrustAction;
+import sponge.database.Methods.TrustAction;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.User;
@@ -42,9 +41,9 @@ import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.scheduler.Task;
-import sponge.Database.Methods.IsoworldsAction;
+import sponge.database.Methods.IsoworldsAction;
 import sponge.Main;
-import sponge.Translation.TranslateManager;
+import sponge.translation.TranslateManager;
 import sponge.location.Locations;
 import sponge.util.action.StatAction;
 import sponge.util.action.StorageAction;
@@ -80,7 +79,7 @@ public class TrustAccessInv {
             for (int i = 0; Objects.requireNonNull(trusts).next(); ++i) {
 
                 // Récupération uuid
-                String[] tmp = trusts.getString(1).split("-Isoworld");
+                String[] tmp = trusts.getString(1).split("-isoworld");
                 UUID uuid = UUID.fromString(tmp[0]);
                 Optional<User> user = StatAction.getPlayerFromUUID(uuid);
 
@@ -116,10 +115,10 @@ public class TrustAccessInv {
                 }
 
                 if (slot.totalQuantity() != 0) {
-                    String uuid = slot.get(Keys.LORE).get().get(0).toString().split("-Isoworld")[0];
+                    String uuid = slot.get(Keys.LORE).get().get(0).toString().split("-isoworld")[0];
                     Logger.info("NAME " + uuid);
                     Optional<User> user = StatAction.getPlayerFromUUID(UUID.fromString(uuid));
-                    String worldname = uuid + "-Isoworld";
+                    String worldname = uuid + "-isoworld";
 
                     // Si la méthode renvoi vrai alors on return car le lock est défini pour l'import, sinon elle le set auto
                     if (StorageAction.iwInProcess(pPlayer, worldname))
@@ -132,7 +131,7 @@ public class TrustAccessInv {
                         if (StorageAction.checkTag(pPlayer, worldname)) {
                             // Chargement du Isoworld + tp
                             IsoworldsAction.setWorldProperties(worldname, pPlayer);
-                            Sponge.server().worldManager().loadWorld(ResourceKey.brigadier(worldname));
+                            Sponge.server().worldManager().loadWorld(Main.instance.getWorldKey(worldname));
                             Locations.teleport(pPlayer, worldname);
                             plugin.cooldown.addPlayerCooldown(pPlayer, Cooldown.CONFIANCE, Cooldown.CONFIANCE_DELAY);
                         }

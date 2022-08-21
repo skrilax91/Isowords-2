@@ -1,11 +1,11 @@
-package sponge.Translation;
+package sponge.translation;
 
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import sponge.Main;
-import sponge.Translation.Default.DefaultTranslation;
-import sponge.Translation.Default.FrenchTranslation;
+import sponge.translation.Default.DefaultTranslation;
+import sponge.translation.Default.FrenchTranslation;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,8 +60,6 @@ public class TranslateManager {
 
     public String translate(String key)
     {
-        Main.instance.getLogger().info("[IW][DEBUG] trying to use key '" + key + "'");
-
         return msgNode.getOrDefault(key.toLowerCase(), "translate." + key);
     }
 

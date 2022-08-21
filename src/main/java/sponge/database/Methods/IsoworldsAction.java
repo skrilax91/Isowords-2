@@ -1,4 +1,4 @@
-package sponge.Database.Methods;
+package sponge.database.Methods;
 
 import common.ManageFiles;
 
@@ -16,7 +16,7 @@ import org.spongepowered.api.world.border.WorldBorder;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
-import sponge.Database.MysqlHandler;
+import sponge.database.MysqlHandler;
 import sponge.Main;
 import sponge.location.Locations;
 import sponge.util.action.StatAction;
@@ -46,7 +46,7 @@ public class IsoworldsAction {
     /**
      * <p> Delete an isoworld
      *
-     * @param playeruuid The world uuid without -Isoworld
+     * @param playeruuid The world uuid without -isoworld
      * @return whether the function was successful or not
      * @exception SQLException if a database access error occurs
      */
@@ -66,7 +66,7 @@ public class IsoworldsAction {
 
             // delete Isoworld
             delete_isoworld.setString(1, playeruuid);
-            delete_isoworld.setString(2, (playeruuid + "-Isoworld"));
+            delete_isoworld.setString(2, (playeruuid + "-isoworld"));
             delete_isoworld.setString(3, Main.instance.servername);
 
             // execute
@@ -84,7 +84,7 @@ public class IsoworldsAction {
     /**
      * <p> Check if an isoworld exist in database
      *
-     * @param playeruuid The world uuid without -Isoworld
+     * @param playeruuid The world uuid without -isoworld
      * @return whether the function was successful or not
      * @exception SQLException if a database access error occurs
      */
@@ -100,7 +100,7 @@ public class IsoworldsAction {
         try {
             PreparedStatement check = connection.prepareStatement(CHECK);
             check.setString(1, playeruuid);
-            check.setString(2, playeruuid + "-Isoworld");
+            check.setString(2, playeruuid + "-isoworld");
             check.setString(3, Main.instance.servername);
             // Request
             ResultSet res = check.executeQuery();
@@ -132,7 +132,7 @@ public class IsoworldsAction {
             // UUID_P
             insert.setString(1, pPlayer.uniqueId().toString());
             // UUID_W
-            insert.setString(2, ((pPlayer.uniqueId()) + "-Isoworld"));
+            insert.setString(2, (pPlayer.uniqueId().toString() + "-isoworld"));
             // Date
             insert.setString(3, (new Timestamp(System.currentTimeMillis())).toString());
             // Serveur_id
@@ -159,15 +159,17 @@ public class IsoworldsAction {
     // Create world properties Isoworlds
     public static void setWorldProperties(String worldname, Player pPlayer) {
 
+        ResourceKey worldKey = ResourceKey.builder().namespace(Main.instance.getContainer()).value(worldname).build();
+
         // Check si world properties en place, création else
-        CompletableFuture<Optional<ServerWorldProperties>> fWp = Sponge.server().worldManager() .loadProperties(ResourceKey.brigadier(worldname));
+        CompletableFuture<Optional<ServerWorldProperties>> fWp = Sponge.server().worldManager().loadProperties(worldKey);
         ServerWorldProperties worldProperties;
 
         try {
             // Deal with permission of owner only
 
             int x = -1;
-            String username = worldname.split("-Isoworld")[0];
+            String username = worldname.split("-isoworld")[0];
             Optional<User> user = StatAction.getPlayerFromUUID(UUID.fromString(username));
 
             // Global
@@ -197,7 +199,7 @@ public class IsoworldsAction {
                 // ****** MODULES ******
                 // Border
                 if (Main.instance.getConfig().modules().borderModule().isEnable()) {
-                    Optional<ServerWorld> world = Sponge.server().worldManager().world(ResourceKey.brigadier(worldname));
+                    Optional<ServerWorld> world = Sponge.server().worldManager().world(worldKey);
                     int finalX = x;
                     world.ifPresent(serverWorld -> serverWorld.setBorder(WorldBorder.builder()
                             .center(Locations.getAxis(worldname).x(), Locations.getAxis(worldname).z())
@@ -211,15 +213,17 @@ public class IsoworldsAction {
                         .displayName(Component.text(worldname))
                         .loadOnStartup(false)
                         .performsSpawnLogic(false)
+                        .key(worldKey)
                         .pvp(true)
                         .build();
                 sponge.util.console.Logger.info("WOLRD PROPERTIES: non présents, création...");
                 Sponge.server().worldManager().loadWorld(template);
+                //Sponge.server().worldManager().saveTemplate(template);
 
                 // ****** MODULES ******
                 // Border
                 if (Main.instance.getConfig().modules().borderModule().isEnable()) {
-                    Optional<ServerWorld> world = Sponge.server().worldManager().world(ResourceKey.brigadier(worldname));
+                    Optional<ServerWorld> world = Sponge.server().worldManager().world(worldKey);
                     int finalX = x;
                     world.ifPresent(serverWorld -> serverWorld.setBorder(WorldBorder.builder()
                             .center(Locations.getAxis(worldname).x(), Locations.getAxis(worldname).z())
@@ -235,6 +239,7 @@ public class IsoworldsAction {
             ie.printStackTrace();
             lock.remove(pPlayer.uniqueId().toString() + ";" + String.class.getName());
         } catch (ExecutionException | InterruptedException e) {
+            Main.instance.getLogger().error(e.getCause());
             throw new RuntimeException(e);
         }
 
@@ -255,10 +260,10 @@ public class IsoworldsAction {
             return true;
 
 
-        setWorldProperties(pPlayer.uniqueId() + "-Isoworld", pPlayer);
-        if (!StorageAction.getStatus(pPlayer.uniqueId() + "-Isoworld")) {
+        setWorldProperties(pPlayer.uniqueId().toString() + "-isoworld", pPlayer);
+        if (!StorageAction.getStatus(pPlayer.uniqueId().toString() + "-isoworld")) {
             // TEST
-            Path levelSponge = Paths.get(ManageFiles.getPath() + pPlayer.uniqueId() + "-Isoworld/" + "level_sponge.dat");
+            Path levelSponge = Paths.get(ManageFiles.getPath() + pPlayer.uniqueId().toString() + "-isoworld/" + "level_sponge.dat");
             if (Files.exists(levelSponge)) {
                 DataContainer dc;
 
@@ -293,7 +298,7 @@ public class IsoworldsAction {
                 }
             }
 
-            Sponge.server().worldManager().loadWorld(ResourceKey.brigadier(pPlayer.uniqueId() + "-Isoworld"));
+            Sponge.server().worldManager().loadWorld(Main.instance.getWorldKey(pPlayer.uniqueId().toString() + "-isoworld"));
         }
         return true;
     }
@@ -344,7 +349,7 @@ public class IsoworldsAction {
             Connection connection = database.getConnection();
             PreparedStatement check = connection.prepareStatement(CHECK);
 
-            check.setString(1, pPlayer.uniqueId().toString() + "-Isoworld");
+            check.setString(1, pPlayer.uniqueId().toString() + "-isoworld");
             // SERVEUR_ID
             check.setString(2, Main.instance.servername);
             // Requête
@@ -398,7 +403,7 @@ public class IsoworldsAction {
             // Number
             check.setInt(1, id);
             // UUID_P
-            check.setString(2, pPlayer.uniqueId().toString() + "-Isoworld");
+            check.setString(2, pPlayer.uniqueId().toString() + "-isoworld");
             // Requête
             check.executeUpdate();
             return true;
