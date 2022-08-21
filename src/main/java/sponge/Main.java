@@ -38,12 +38,12 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
-import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 
 import sponge.Database.MysqlHandler;
+import sponge.Translation.TranslateManager;
 import sponge.command.Commands;
 import sponge.configuration.IsoworldConfiguration;
 import sponge.listener.ChatListeners;
@@ -71,6 +71,8 @@ public class Main implements IMain {
     public static Map<String, Integer> lock = new HashMap<>();
     public Cooldown cooldown;
     public MysqlHandler database;
+    public TranslateManager translateManager;
+
 
     @DefaultConfig(sharedRoot = false)
     private final HoconConfigurationLoader ConfigLoader;
@@ -119,6 +121,9 @@ public class Main implements IMain {
             System.exit(1);
         }
         logger.info("[IW] Fichiers chargés !");
+
+        logger.info("[IW] Récupération de la langue du plugin");
+        translateManager = new TranslateManager();
 
         // Log configs
         logger.info("[IW][CONFIG] id: " + this.config.serverId());

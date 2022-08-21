@@ -34,7 +34,7 @@ import java.util.Map;
 
 public class Msg {
 
-    public static Map<String, String> msgNode = new HashMap<String, String>();
+    public static Map<String, String> msgNode = new HashMap<>();
 
     public static void keys() {
 
@@ -45,7 +45,7 @@ public class Msg {
                     Charset.defaultCharset());
 
             for (String line : lines) {
-                if (!line.equals("") || !line.equals(" ")) {
+                if (!line.equals("") && !line.equals(" ")) {
                     msgNode.put(line.split(":")[0], line.split("\"")[1]);
                 }
             }

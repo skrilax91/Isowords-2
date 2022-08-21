@@ -79,6 +79,7 @@ public class Pull implements Consumer<ScheduledTask> {
     public static Task createTask(Player pPlayer, File file)
     {
         return Task.builder()
+                .plugin(Main.instance.getContainer())
                 .execute(new Pull(pPlayer, file))
                 .interval(1, TimeUnit.SECONDS)
                 .plugin(Main.instance.getContainer())

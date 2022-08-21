@@ -43,6 +43,7 @@ import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.scheduler.Task;
+import sponge.Main;
 import sponge.location.Locations;
 import sponge.util.console.Logger;
 import sponge.util.inventory.biome.BiomeInv;
@@ -194,21 +195,21 @@ public class MainInv {
     }
 
     public static void closeOpenMenu(ServerPlayer pPlayer, InventoryMenu inv) {
-        Sponge.asyncScheduler().submit(Task.builder().execute(() -> {
+        Sponge.asyncScheduler().submit(Task.builder().plugin(Main.instance.getContainer()).execute(() -> {
             pPlayer.closeInventory();
             pPlayer.openInventory(inv.inventory());
         }).delay(10, TimeUnit.MILLISECONDS).build(), "Ferme l'inventaire d'un joueur et en ouvre un autre.");
     }
 
     public static void closeMenu(ServerPlayer pPlayer) {
-        Sponge.asyncScheduler().submit(Task.builder().execute(() -> {
+        Sponge.asyncScheduler().submit(Task.builder().plugin(Main.instance.getContainer()).execute(() -> {
             pPlayer.closeInventory();
             pPlayer.openInventory(menuPrincipal(pPlayer).inventory());
         }).delay(10, TimeUnit.MILLISECONDS).build(), "Ferme l'inventaire d'un joueur.");
     }
 
     public static void commandMenu(ServerPlayer pPlayer, String cmd) {
-        Sponge.asyncScheduler().submit(Task.builder().execute(() -> {
+        Sponge.asyncScheduler().submit(Task.builder().plugin(Main.instance.getContainer()).execute(() -> {
             try {
                 Sponge.server().commandManager().process(pPlayer, cmd);
             } catch (CommandException e) {
@@ -218,7 +219,7 @@ public class MainInv {
     }
 
     public static void teleportMenu(Player pPlayer, String cmd) {
-        Sponge.asyncScheduler().submit(Task.builder().execute(() -> {
+        Sponge.asyncScheduler().submit(Task.builder().plugin(Main.instance.getContainer()).execute(() -> {
             Logger.info("TP CMD: " + cmd);
             Locations.teleport(pPlayer, cmd);
         }).delay(10, TimeUnit.MILLISECONDS).build(), "Téléporte le joueur dans un Isoworld.");

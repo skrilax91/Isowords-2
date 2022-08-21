@@ -126,7 +126,7 @@ public class TrustAccessInv {
                         return false;
 
                     // Pull du Isoworld
-                    Sponge.asyncScheduler().submit(Task.builder().execute(() -> {
+                    Sponge.asyncScheduler().submit(Task.builder().plugin(Main.instance.getContainer()).execute(() -> {
                         // Si monde présent en dossier ?
                         // Removing iwInProcess in task
                         if (StorageAction.checkTag(pPlayer, worldname)) {

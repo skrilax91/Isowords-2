@@ -65,7 +65,7 @@ public class ManageFiles {
     // Copy lang.Yml
     public static void copy(InputStream in, File file) {
         try {
-            OutputStream out = new FileOutputStream(file);
+            OutputStream out = Files.newOutputStream(file.toPath());
             byte[] buf = new byte[1024];
             int len;
             while((len=in.read(buf))>0){
@@ -151,13 +151,11 @@ public class ManageFiles {
     // Get lang.yml path
     // To set dynamic
     public static String getLangPath() {
-        String pathBukkit = (System.getProperty("user.dir") + "/plugins/Isoworlds/lang.yml");
         String pathSpongeDefault = (System.getProperty("user.dir") + "/config/isoworlds/lang.yml");
         String pathSponge = (System.getProperty("user.dir") + "/plugins-config/isoworlds/lang.yml");
 
-        if (new File(pathBukkit).exists()) {
-            return pathBukkit;
-        } else if (new File(pathSpongeDefault).exists()) {
+
+        if (new File(pathSpongeDefault).exists()) {
             return pathSpongeDefault;
         } else if (new File(pathSponge).exists()) {
             return pathSponge;

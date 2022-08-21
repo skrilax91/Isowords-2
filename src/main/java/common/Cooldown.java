@@ -79,15 +79,6 @@ public class Cooldown implements ICooldown {
     }
 
     /**
-     * Bukkit method
-     */
-    private Timestamp getPlayerLastCooldown(org.bukkit.entity.Player pPlayer, String type) {
-        String uuid_p = pPlayer.getUniqueId().toString();
-
-        return getPlayerLastCooldown(uuid_p, type);
-    }
-
-    /**
      * Return all the occurences for a given player, type (ex: refonte) with date greater than now
      */
     private Timestamp getPlayerLastCooldown(String uuid_p, String type) {
@@ -126,14 +117,6 @@ public class Cooldown implements ICooldown {
      */
     public void addPlayerCooldown(Player pPlayer, String type, int delay) {
         String uuid_p = pPlayer.uniqueId().toString();
-        addPlayerCooldown(uuid_p, type, delay);
-    }
-
-    /**
-     * Bukkit method
-     */
-    public void addPlayerCooldown(org.bukkit.entity.Player pPlayer, String type, int delay) {
-        String uuid_p = pPlayer.getUniqueId().toString();
         addPlayerCooldown(uuid_p, type, delay);
     }
 

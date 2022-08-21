@@ -77,9 +77,9 @@ public class Listeners {
 
         // Teleport to spawn of own Isoworld if is loaded
         if (Sponge.server().worldManager().world(ResourceKey.brigadier(worldname)).isPresent() && Sponge.server().worldManager().world(ResourceKey.brigadier(worldname)).get().isLoaded()) {
-            Sponge.asyncScheduler().submit(Task.builder().execute(() -> Locations.teleport(p, worldname)).delay(2, TimeUnit.MILLISECONDS).build());
+            Sponge.asyncScheduler().submit(Task.builder().plugin(Main.instance.getContainer()).execute(() -> Locations.teleport(p, worldname)).delay(2, TimeUnit.MILLISECONDS).build());
         } else if (Sponge.server().worldManager().world(ResourceKey.brigadier("Isolonice")).isPresent()) {
-            Sponge.asyncScheduler().submit(Task.builder().execute(() -> Locations.teleport(p, "Isolonice")).delay(2, TimeUnit.MILLISECONDS).build());
+            Sponge.asyncScheduler().submit(Task.builder().plugin(Main.instance.getContainer()).execute(() -> Locations.teleport(p, "Isolonice")).delay(2, TimeUnit.MILLISECONDS).build());
         }
     }
 
@@ -127,7 +127,7 @@ public class Listeners {
     public void onConnect(ServerSideConnectionEvent.Join event) {
         // Welcome message and open menu for those who do not have their own Isoworld
         if (!IsoworldsAction.iwExists(event.player().uniqueId().toString())) {
-            Sponge.asyncScheduler().submit(Task.builder().execute(() -> {
+            Sponge.asyncScheduler().submit(Task.builder().plugin(Main.instance.getContainer()).execute(() -> {
                 event.player().sendMessage(Message.success(msgNode.get("FirstJoin")));
                 try {
                     Sponge.server().commandManager().process(event.player(), "iw");
@@ -141,7 +141,7 @@ public class Listeners {
     @Listener
     public void onLogin(ServerSideConnectionEvent.Login event) {
         String worldname = ("Isolonice");
-        Sponge.asyncScheduler().submit(Task.builder().execute(() -> Locations.teleport(event.user().player().get(), worldname)).delay(1 / 5, TimeUnit.SECONDS).build());
+        Sponge.asyncScheduler().submit(Task.builder().plugin(Main.instance.getContainer()).execute(() -> Locations.teleport(event.user().player().get(), worldname)).delay(1 / 5, TimeUnit.SECONDS).build());
     }
 
     // Logout event, tp spawn

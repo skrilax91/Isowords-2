@@ -28,12 +28,13 @@ import sponge.Database.Methods.PlayTimeAction;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.scheduler.Task;
+import sponge.Main;
 
 public class PlayTime {
 
     // Update playtime
     public static void IncreasePlayTime() {
-        Sponge.asyncScheduler().submit(Task.builder().execute(() -> {
+        Sponge.asyncScheduler().submit(Task.builder().plugin(Main.instance.getContainer()).execute(() -> {
             for (ServerPlayer p : Sponge.server().onlinePlayers()) {
                 PlayTimeAction.updatePlayTime(p);
             }

@@ -55,6 +55,7 @@ public class Push implements Runnable {
                 Task.builder()
                         .execute(new Push())
                         .interval(1, TimeUnit.MINUTES)
+                        .plugin(Main.instance.getContainer())
                         .build(),
                 "Analyse des Isoworlds vides...");
     }

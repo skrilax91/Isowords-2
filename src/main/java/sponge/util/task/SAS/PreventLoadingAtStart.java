@@ -72,7 +72,7 @@ public class PreventLoadingAtStart {
     }
 
     public static void moveBack() {
-        Sponge.asyncScheduler().submit(Task.builder().execute(() -> {
+        Sponge.asyncScheduler().submit(Task.builder().plugin(Main.instance.getContainer()).execute(() -> {
             sponge.util.console.Logger.info("[Isoworlds-SAS]: Remise en place des Isoworlds dans le SAS");
             File source = new File(ManageFiles.getPath() + "Isoworlds-UTILS/Isoworlds-SAS/");
             File dest = new File(ManageFiles.getPath());

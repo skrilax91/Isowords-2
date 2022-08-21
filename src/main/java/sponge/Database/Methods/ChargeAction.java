@@ -27,7 +27,6 @@ package sponge.Database.Methods;
 import common.Manager;
 import common.Msg;
 import sponge.Database.MysqlHandler;
-import org.bukkit.entity.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import java.sql.Connection;

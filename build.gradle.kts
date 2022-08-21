@@ -1,9 +1,11 @@
 import org.spongepowered.gradle.plugin.config.PluginLoaders
 import org.spongepowered.plugin.metadata.model.PluginDependency
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
     `java-library`
     id("org.spongepowered.gradle.plugin") version "2.0.2"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
 group = "dev.devix"
@@ -18,9 +20,9 @@ repositories {
 }
 
 dependencies {
-    implementation("org.bukkit:bukkit:1.8-R0.1-SNAPSHOT")
     implementation("org.spongepowered:configurate-hocon:4.1.2")
-    implementation( "mysql", "mysql-connector-java", "8.0.25")
+    implementation( "mysql", "mysql-connector-java", "8.0.30")
+    shadow("mysql:mysql-connector-java:8.0.30")
 }
 
 sponge {
@@ -72,3 +74,18 @@ tasks.withType(AbstractArchiveTask::class).configureEach {
     isReproducibleFileOrder = true
     isPreserveFileTimestamps = false
 }
+
+tasks {
+    named<ShadowJar>("shadowJar") {
+        dependencies {
+            include(dependency("mysql:mysql-connector-java:8.0.30"))
+        }
+    }
+}
+
+tasks {
+    build {
+        dependsOn(shadowJar)
+    }
+}
+

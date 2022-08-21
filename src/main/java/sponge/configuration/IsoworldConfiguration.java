@@ -13,6 +13,9 @@ public class IsoworldConfiguration {
     @Comment("Server name stored in database, feel free. Example: (AgrarianSkies2 : AS2)")
     private String serverId = "DEV";
 
+    @Comment("Locale used in all plugin message, check locales folder for more precision")
+    private String localeTag = "en";
+
     @Comment("Main world name (not folder name), used to teleport players on login/logout and build safe spawn (avoid death)")
     private String mainWorld = "Isolonice";
 
@@ -89,4 +92,8 @@ public class IsoworldConfiguration {
     public boolean isSpawnProtection() {
         return spawnProtection;
     }
+
+    public String getLocaleTag() { return localeTag; }
+
+    public void setLocaleTag(String localeTag) { this.localeTag = localeTag; }
 }
