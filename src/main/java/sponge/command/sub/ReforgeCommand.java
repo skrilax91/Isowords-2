@@ -26,7 +26,6 @@ package sponge.command.sub;
 
 import common.Cooldown;
 import common.ManageFiles;
-import common.Msg;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.Command;
@@ -41,6 +40,7 @@ import sponge.Main;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
+import sponge.Translation.TranslateManager;
 import sponge.util.action.StatAction;
 import sponge.util.message.Message;
 
@@ -51,6 +51,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class ReforgeCommand implements CommandExecutor {
+    private static TranslateManager translateManager = Main.instance.translateManager;
 
     private final Main plugin = Main.instance;
     final static Map<String, Timestamp> confirm = new HashMap<>();
@@ -73,13 +74,13 @@ public class ReforgeCommand implements CommandExecutor {
 
         // Check is Isoworld exists in database
         if (!sponge.Database.Methods.IsoworldsAction.isPresent(pPlayer, false)) {
-            pPlayer.sendMessage(Message.error(Msg.msgNode.get("IsoworldNotFound")));
+            pPlayer.sendMessage(Message.error(translateManager.translate("IsoworldNotFound")));
             return CommandResult.success();
         }
 
         // Confirmation message (2 times cmd)
         if (!(confirm.containsKey(pPlayer.uniqueId().toString()))) {
-            pPlayer.sendMessage(Message.error(Msg.msgNode.get("Confirm")));
+            pPlayer.sendMessage(Message.error(translateManager.translate("Confirm")));
             confirm.put(pPlayer.uniqueId().toString(), timestamp);
             return CommandResult.success();
         } else {
@@ -87,7 +88,7 @@ public class ReforgeCommand implements CommandExecutor {
             long minutes = TimeUnit.MILLISECONDS.toMinutes(millis);
             if (minutes >= 1) {
                 confirm.remove(pPlayer.uniqueId().toString());
-                pPlayer.sendMessage(Message.error(Msg.msgNode.get("Confirm")));
+                pPlayer.sendMessage(Message.error(translateManager.translate("Confirm")));
                 return CommandResult.success();
             }
         }
@@ -100,7 +101,7 @@ public class ReforgeCommand implements CommandExecutor {
         destDir.mkdir();
 
         if (!Sponge.server().worldManager().world(ResourceKey.brigadier(worldname)).isPresent()) {
-            pPlayer.sendMessage(Message.error(Msg.msgNode.get("IsoworldNotFound")));
+            pPlayer.sendMessage(Message.error(translateManager.translate("IsoworldNotFound")));
             return CommandResult.success();
         }
         if (Sponge.server().worldManager().world(ResourceKey.brigadier(worldname)).get().isLoaded()) {
@@ -108,14 +109,14 @@ public class ReforgeCommand implements CommandExecutor {
 
             for (ServerPlayer player : colPlayers) {
                 player.setLocation(ServerLocation.of(spawnWorld, spawnWorld.properties().spawnPosition()));
-                pPlayer.sendMessage(Message.error(Msg.msgNode.get("ReforgeKick")));
+                pPlayer.sendMessage(Message.error(translateManager.translate("ReforgeKick")));
             }
             Sponge.server().worldManager().unloadWorld(Sponge.server().worldManager().world(ResourceKey.brigadier(worldname)).get());
         }
 
         try {
             if (!IsoworldsAction.deleteIsoworld(pPlayer.uniqueId().toString())) {
-                pPlayer.sendMessage(Message.error(Msg.msgNode.get("FailReforgeIsoworld")));
+                pPlayer.sendMessage(Message.error(translateManager.translate("FailReforgeIsoworld")));
                 return CommandResult.success();
             }
         } catch (SQLException e) {
@@ -124,7 +125,7 @@ public class ReforgeCommand implements CommandExecutor {
         // Deleting isoworld
         Sponge.server().worldManager().deleteWorld(ResourceKey.brigadier(worldname));
 
-        pPlayer.sendMessage(Message.success(Msg.msgNode.get("SuccesReforge")));
+        pPlayer.sendMessage(Message.success(translateManager.translate("SuccesReforge")));
 
         plugin.cooldown.addPlayerCooldown(pPlayer, Cooldown.REFONTE, Cooldown.REFONTE_DELAY);
 

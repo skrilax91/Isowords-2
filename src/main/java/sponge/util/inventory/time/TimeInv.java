@@ -36,26 +36,26 @@ import org.spongepowered.api.item.inventory.menu.ClickTypes;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
+import sponge.Main;
+import sponge.Translation.TranslateManager;
 import sponge.util.inventory.MainInv;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static common.Msg.msgNode;
-import static sponge.Main.instance;
-
 public class TimeInv {
+    private static TranslateManager translateManager = Main.instance.translateManager;
 
     public static InventoryMenu getInv(ServerPlayer pPlayer) {
 
-        ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X1).completeStructure().carrier(pPlayer).build();
+        ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X1).completeStructure().plugin(Main.instance.getContainer()).carrier(pPlayer).build();
         InventoryMenu menu = inventory.asMenu();
         menu.setReadOnly(true);
-        menu.setTitle(Component.text("Isoworlds: " + msgNode.get("InvTime")).color(NamedTextColor.BLUE));
+        menu.setTitle(Component.text("Isoworlds: " + translateManager.translate("InvTime")).color(NamedTextColor.BLUE));
 
         // Day
         List<Component> list1 = new ArrayList<>();
-        list1.add(Component.text(msgNode.get("TimeDayLore")));
+        list1.add(Component.text(translateManager.translate("TimeDayLore")));
 
         ItemStack item1 = ItemStack.builder().itemType(ItemTypes.WHITE_WOOL).add(Keys.LORE, list1).add(Keys.DISPLAY_NAME, Component.text("Jour")
                 .color(NamedTextColor.YELLOW)).quantity(1).build();
@@ -63,7 +63,7 @@ public class TimeInv {
 
         // Night
         List<Component> list2 = new ArrayList<>();
-        list2.add(Component.text(msgNode.get("TimeNightLore")));
+        list2.add(Component.text(translateManager.translate("TimeNightLore")));
 
         ItemStack item2 = ItemStack.builder().itemType(ItemTypes.BLACK_WOOL).add(Keys.LORE, list2).add(Keys.DISPLAY_NAME, Component.text("Nuit")
                 .color(NamedTextColor.BLUE)).quantity(1).build();
@@ -71,9 +71,9 @@ public class TimeInv {
 
         // Menu principal
         List<Component> list9 = new ArrayList<>();
-        list9.add(Component.text(msgNode.get("MainMenuLore")));
+        list9.add(Component.text(translateManager.translate("MainMenuLore")));
 
-        ItemStack item9 = ItemStack.builder().itemType(ItemTypes.GOLD_BLOCK).add(Keys.LORE, list9).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("MainMenu"))
+        ItemStack item9 = ItemStack.builder().itemType(ItemTypes.GOLD_BLOCK).add(Keys.LORE, list9).add(Keys.DISPLAY_NAME, Component.text(translateManager.translate("MainMenu"))
                 .color(NamedTextColor.RED)).quantity(1).build();
         menu.inventory().set(8, item9);
 

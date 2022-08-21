@@ -77,7 +77,7 @@ public class PreventLoadingAtStart {
             File source = new File(ManageFiles.getPath() + "Isoworlds-UTILS/Isoworlds-SAS/");
             File dest = new File(ManageFiles.getPath());
             // Retourne la liste des Isoworld tag
-            for (File f : ManageFiles.getOutSAS(new File(source.getPath()))) {
+            for (File f : ManageFiles.getOutSAS(source)) {
                 // Gestion des Isoworlds non push, si ne contient pas de tag
                 if (ManageFiles.move(source + "/" + f.getName(), dest.getPath())) {
                     logger.info("[Isoworlds-SAS]: " + f.getName() + " retiré du SAS");

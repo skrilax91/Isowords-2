@@ -25,7 +25,6 @@
 package sponge.command.sub;
 
 import common.Cooldown;
-import common.Msg;
 import sponge.Database.Methods.TrustAction;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.ResourceKey;
@@ -45,6 +44,7 @@ import org.spongepowered.api.command.CommandResult;
 
 import org.spongepowered.api.entity.living.player.User;
 
+import sponge.Translation.TranslateManager;
 import sponge.util.action.StatAction;
 import sponge.util.message.Message;
 
@@ -52,6 +52,7 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 public class UnTrustCommand implements CommandExecutor {
+    private static TranslateManager translateManager = Main.instance.translateManager;
 
     private final Main instance = Main.instance;
 
@@ -75,7 +76,7 @@ public class UnTrustCommand implements CommandExecutor {
 
         // SELECT WORLD
         if (!IsoworldsAction.isPresent(pPlayer, false)) {
-            pPlayer.sendMessage(Message.error(Msg.msgNode.get("IsoworldNotFound")));
+            pPlayer.sendMessage(Message.error(translateManager.translate("IsoworldNotFound")));
             return CommandResult.success();
         }
 
@@ -85,13 +86,13 @@ public class UnTrustCommand implements CommandExecutor {
             Optional<User> otrg = Sponge.server().userManager().load(username).get();
 
             if (!otrg.isPresent()) {
-                pPlayer.sendMessage(Message.error(Msg.msgNode.get("InvalidPlayer")));
+                pPlayer.sendMessage(Message.error(translateManager.translate("InvalidPlayer")));
                 return CommandResult.success();
             }
             target = otrg.get();
 
             if (target.uniqueId().toString().isEmpty()) {
-                pPlayer.sendMessage(Message.error(Msg.msgNode.get("InvalidPlayer")));
+                pPlayer.sendMessage(Message.error(translateManager.translate("InvalidPlayer")));
                 return CommandResult.success();
             }
         } catch (NoSuchElementException | IllegalArgumentException i) {
@@ -103,7 +104,7 @@ public class UnTrustCommand implements CommandExecutor {
 
         // CHECK AUTORISATIONS
         if (!TrustAction.isTrusted(target.player().get(), pPlayer.uniqueId().toString())) {
-            pPlayer.sendMessage(Message.error(Msg.msgNode.get("NotTrusted")));
+            pPlayer.sendMessage(Message.error(translateManager.translate("NotTrusted")));
             return CommandResult.success();
         }
 
@@ -117,14 +118,14 @@ public class UnTrustCommand implements CommandExecutor {
                 ServerWorld spawnWorld = Sponge.server().worldManager().world(ResourceKey.brigadier("Isolonice")).get();
                 if (target.player().get().world().properties().name().equals(pPlayer.uniqueId().toString() + "-Isoworld")) {
                     target.player().get().setLocation(ServerLocation.of(spawnWorld, spawnWorld.properties().spawnPosition()));
-                    pPlayer.sendMessage(Message.error(Msg.msgNode.get("NotTrusted")));
+                    pPlayer.sendMessage(Message.error(translateManager.translate("NotTrusted")));
                 }
             }
         } catch (NoSuchElementException nse) {
             nse.printStackTrace();
         }
 
-        pPlayer.sendMessage(Message.success(Msg.msgNode.get("SuccessUntrust")));
+        pPlayer.sendMessage(Message.success(translateManager.translate("SuccessUntrust")));
         return CommandResult.success();
     }
 

@@ -39,6 +39,7 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 import sponge.util.inventory.MainInv;
+import sponge.util.message.Message;
 
 public class Commands implements CommandExecutor {
 
@@ -46,17 +47,15 @@ public class Commands implements CommandExecutor {
 
     @Override
     public CommandResult execute(CommandContext context) throws CommandException {
+        Object src = context.cause().root();
         ServerPlayer pPlayer = null;
-        CommandCause cause = context.cause();
-
-        Audience audience = cause.audience();
-        if (audience instanceof ServerPlayer) {
-            pPlayer = (ServerPlayer) audience;
+        if (src instanceof ServerPlayer) {
+            pPlayer = (ServerPlayer) src;
         } else {
-            throw new CommandException(Component.text("Your are not a player.", NamedTextColor.RED));
+            throw new CommandException(Message.error("Your are not a player."));
         }
 
-        pPlayer.openInventory(MainInv.menuPrincipal(pPlayer).inventory());
+        MainInv.menuPrincipal(pPlayer).open(pPlayer);
         return CommandResult.success();
     }
 

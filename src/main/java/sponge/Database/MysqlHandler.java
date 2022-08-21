@@ -71,6 +71,7 @@ public class MysqlHandler {
             connection.prepareStatement(ISOWORLDS).execute();
             connection.prepareStatement(PLAYER_INFO).execute();
             connection.prepareStatement(PLAYER_COOLDOWN).execute();
+            connection.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

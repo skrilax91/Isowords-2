@@ -1,10 +1,8 @@
 package sponge.Translation;
 
-import common.ManageFiles;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
-import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 import sponge.Main;
 import sponge.Translation.Default.DefaultTranslation;
 import sponge.Translation.Default.FrenchTranslation;
@@ -48,7 +46,9 @@ public class TranslateManager {
                 if (!line.equals("") && !line.equals(" ")) {
 
                     String value = line.split("=")[1].replaceAll("\"", "");
-                    msgNode.put(line.split("=")[0], value);
+                    String key = line.split("=")[0].toLowerCase().replaceAll("-", "");
+
+                    msgNode.put(key, value);
                 }
             }
         } catch (Exception e) {
@@ -60,7 +60,9 @@ public class TranslateManager {
 
     public String translate(String key)
     {
-        return msgNode.getOrDefault(key, key);
+        Main.instance.getLogger().info("[IW][DEBUG] trying to use key '" + key + "'");
+
+        return msgNode.getOrDefault(key.toLowerCase(), "translate." + key);
     }
 
     private <T extends DefaultTranslation> void createConf(Class<T> type, String file)

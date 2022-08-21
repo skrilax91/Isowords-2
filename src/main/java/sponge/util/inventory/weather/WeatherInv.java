@@ -37,53 +37,53 @@ import org.spongepowered.api.item.inventory.menu.ClickTypes;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
+import sponge.Main;
+import sponge.Translation.TranslateManager;
 import sponge.util.inventory.MainInv;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static common.Msg.msgNode;
-import static sponge.Main.instance;
-
 public class WeatherInv {
+    private static TranslateManager translateManager = Main.instance.translateManager;
 
     public static InventoryMenu getInv(ServerPlayer pPlayer) {
 
-        ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X1).completeStructure().carrier(pPlayer).build();
+        ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X1).completeStructure().plugin(Main.instance.getContainer()).carrier(pPlayer).build();
         InventoryMenu menu = inventory.asMenu();
         menu.setReadOnly(true);
-        menu.setTitle(Component.text("Isoworlds: " + msgNode.get("InvWeather")).color(NamedTextColor.BLUE));
+        menu.setTitle(Component.text("Isoworlds: " + translateManager.translate("InvWeather")).color(NamedTextColor.BLUE));
 
 
         // Sun
         List<Component> list1 = new ArrayList<>();
-        list1.add(Component.text(msgNode.get("WeatherSunLore")));
+        list1.add(Component.text(translateManager.translate("WeatherSunLore")));
 
-        ItemStack item1 = ItemStack.builder().itemType(ItemTypes.YELLOW_WOOL).add(Keys.LORE, list1).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("WeatherSun"))
+        ItemStack item1 = ItemStack.builder().itemType(ItemTypes.YELLOW_WOOL).add(Keys.LORE, list1).add(Keys.DISPLAY_NAME, Component.text(translateManager.translate("WeatherSun"))
                 .color(NamedTextColor.YELLOW)).quantity(1).build();
         menu.inventory().set(0, item1);
 
         // Rain
         List<Component> list2 = new ArrayList<>();
-        list2.add(Component.text(msgNode.get("WeatherRainLore")));
+        list2.add(Component.text(translateManager.translate("WeatherRainLore")));
 
-        ItemStack item2 = ItemStack.builder().itemType(ItemTypes.LIGHT_BLUE_WOOL).add(Keys.LORE, list2).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("WeatherRain"))
+        ItemStack item2 = ItemStack.builder().itemType(ItemTypes.LIGHT_BLUE_WOOL).add(Keys.LORE, list2).add(Keys.DISPLAY_NAME, Component.text(translateManager.translate("WeatherRain"))
                 .color(NamedTextColor.BLUE)).quantity(1).build();
         menu.inventory().set(1, item2);
 
         // Storm
         List<Component> list3 = new ArrayList<>();
-        list3.add(Component.text(msgNode.get("WeatherStormLore")));
+        list3.add(Component.text(translateManager.translate("WeatherStormLore")));
 
-        ItemStack item3 = ItemStack.builder().itemType(ItemTypes.RED_WOOL).add(Keys.LORE, list3).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("WeatherStorm"))
+        ItemStack item3 = ItemStack.builder().itemType(ItemTypes.RED_WOOL).add(Keys.LORE, list3).add(Keys.DISPLAY_NAME, Component.text(translateManager.translate("WeatherStorm"))
                 .color(NamedTextColor.RED)).quantity(1).build();
         menu.inventory().set(2, item3);
 
         // Menu principal
         List<Component> list9 = new ArrayList<>();
-        list9.add(Component.text(msgNode.get("MainMenuLore")));
+        list9.add(Component.text(translateManager.translate("MainMenuLore")));
 
-        ItemStack item9 = ItemStack.builder().itemType(ItemTypes.GOLD_BLOCK).add(Keys.LORE, list9).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("MainMenu"))
+        ItemStack item9 = ItemStack.builder().itemType(ItemTypes.GOLD_BLOCK).add(Keys.LORE, list9).add(Keys.DISPLAY_NAME, Component.text(translateManager.translate("MainMenu"))
                 .color(NamedTextColor.RED)).quantity(1).build();
         menu.inventory().set(8, item9);
 

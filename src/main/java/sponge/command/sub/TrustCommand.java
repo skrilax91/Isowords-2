@@ -25,7 +25,6 @@
 package sponge.command.sub;
 
 import common.Cooldown;
-import common.Msg;
 import sponge.Database.Methods.TrustAction;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.command.Command;
@@ -39,12 +38,14 @@ import sponge.Main;
 
 import org.spongepowered.api.command.CommandResult;
 
+import sponge.Translation.TranslateManager;
 import sponge.util.action.StatAction;
 import sponge.util.message.Message;
 
 import java.util.*;
 
 public class TrustCommand implements CommandExecutor {
+    private static TranslateManager translateManager = Main.instance.translateManager;
 
     private final Main plugin = Main.instance;
 
@@ -68,7 +69,7 @@ public class TrustCommand implements CommandExecutor {
 
         // Check if world exists
         if (!IsoworldsAction.isPresent(pPlayer, false)) {
-            pPlayer.sendMessage(Message.error(Msg.msgNode.get("IsoworldNotFound")));
+            pPlayer.sendMessage(Message.error(translateManager.translate("IsoworldNotFound")));
             return CommandResult.success();
         }
 
@@ -79,7 +80,7 @@ public class TrustCommand implements CommandExecutor {
             uuidcible = target.uniqueId();
 
             if (uuidcible.toString().isEmpty()) {
-                pPlayer.sendMessage(Message.error(Msg.msgNode.get("InvalidPlayer")));
+                pPlayer.sendMessage(Message.error(translateManager.translate("InvalidPlayer")));
                 return CommandResult.success();
             }
         } catch (NoSuchElementException | IllegalArgumentException i) {
@@ -89,7 +90,7 @@ public class TrustCommand implements CommandExecutor {
 
         // CHECK AUTORISATIONS
         if (TrustAction.isTrusted(target, pPlayer.uniqueId().toString())) {
-            pPlayer.sendMessage(Message.error(Msg.msgNode.get("AlreadyTrusted")));
+            pPlayer.sendMessage(Message.error(translateManager.translate("AlreadyTrusted")));
             return CommandResult.success();
         }
 
@@ -99,7 +100,7 @@ public class TrustCommand implements CommandExecutor {
             return CommandResult.success();
         }
 
-        pPlayer.sendMessage(Message.success(Msg.msgNode.get("SuccessTrust")));
+        pPlayer.sendMessage(Message.success(translateManager.translate("SuccessTrust")));
 
         plugin.cooldown.addPlayerCooldown(pPlayer, Cooldown.CONFIANCE, Cooldown.CONFIANCE_DELAY);
         return CommandResult.success();

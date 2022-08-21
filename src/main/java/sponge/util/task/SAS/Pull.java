@@ -24,11 +24,11 @@
  */
 package sponge.util.task.SAS;
 
-import common.Msg;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
 import sponge.Main;
+import sponge.Translation.TranslateManager;
 import sponge.util.action.StorageAction;
 import sponge.util.message.Message;
 
@@ -37,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class Pull implements Consumer<ScheduledTask> {
+    private static TranslateManager translateManager = Main.instance.translateManager;
 
     private int check = 60;
     private final Player pPlayer;
@@ -52,13 +53,13 @@ public class Pull implements Consumer<ScheduledTask> {
         // Message de démarrage process
         if (check == 60) {
             // Notification au joueur qu'il doit patienter
-            pPlayer.sendMessage(Message.info(Msg.msgNode.get("ProcessingPull")));
+            pPlayer.sendMessage(Message.info(translateManager.translate("ProcessingPull")));
         }
         check --;
         // Si inférieur à 1 alors tout le temps s'est écoulé sans que le Isoworld soit présent en fichier
         if (check < 1) {
             // Notification au joueur de contacter l'équipe
-            pPlayer.sendMessage(Message.error(Msg.msgNode.get("FailPull")));
+            pPlayer.sendMessage(Message.error(translateManager.translate("FailPull")));
             // Suppression du TAG pour permettre l'utilisation de la commande maison et confiance access
             Main.lock.remove(file.getName() + ";" + file.getName());
             Main.lock.remove(pPlayer.uniqueId().toString() + ";" + "checkTag");
@@ -68,7 +69,7 @@ public class Pull implements Consumer<ScheduledTask> {
             // Passage de l'Isoworld en statut présent
             StorageAction.setStatus(file.getName(), 0);
             // Notification au joueur que le Isoworld est disponible
-            pPlayer.sendMessage(Message.success(Msg.msgNode.get("SuccessPull")));
+            pPlayer.sendMessage(Message.success(translateManager.translate("SuccessPull")));
             // Suppression du TAG pour permettre l'utilisation de la commande maison et confiance access
             Main.lock.remove(file.getName() + ";" + file.getName());
             Main.lock.remove(pPlayer.uniqueId().toString() + ";" + "checkTag");

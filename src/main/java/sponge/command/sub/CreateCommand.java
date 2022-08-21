@@ -36,8 +36,9 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import sponge.Database.Methods.IsoworldsAction;
+import sponge.Main;
+import sponge.Translation.TranslateManager;
 import sponge.util.message.Message;
-import common.Msg;
 import sponge.Database.Methods.TrustAction;
 import sponge.location.Locations;
 import common.ManageFiles;
@@ -49,6 +50,7 @@ import java.io.*;
 import java.sql.SQLException;
 
 public class CreateCommand implements CommandExecutor {
+    private static TranslateManager translateManager = Main.instance.translateManager;
 
     @Override
     public CommandResult execute(CommandContext context) throws CommandException {
@@ -66,29 +68,29 @@ public class CreateCommand implements CommandExecutor {
 
         // Check if Isoworld exists in database
         if (IsoworldsAction.isPresent(pPlayer, false)) {
-            pPlayer.sendMessage(Message.error(Msg.msgNode.get("IsoworldAlreadyExists")));
+            pPlayer.sendMessage(Message.error(translateManager.translate("IsoworldAlreadyExists")));
             return CommandResult.success();
         }
 
         // Create message
-        pPlayer.sendMessage(Message.success(Msg.msgNode.get("CreatingIsoworld")));
+        pPlayer.sendMessage(Message.success(translateManager.translate("CreatingIsoworld")));
 
         fullPath = (ManageFiles.getPath() + pPlayer.uniqueId() + "-Isoworld");
         worldName = (pPlayer.user().profile().uuid() + "-Isoworld");
 
         // Check properties exists
         if (Sponge.server().worldManager().worldExists(ResourceKey.brigadier(worldName))) {
-            pPlayer.sendMessage(Message.error(Msg.msgNode.get("IsoworldAlreadyExists")));
+            pPlayer.sendMessage(Message.error(translateManager.translate("IsoworldAlreadyExists")));
             return CommandResult.success();
         }
 
         // Check arg lenght en send patern types message
         if (!context.hasAny(Parameter.key("type", char.class))) {
-            pPlayer.sendMessage(Message.error(Msg.msgNode.get("HeaderIsoworld")));
-            pPlayer.sendMessage(Message.error(Msg.msgNode.get("SpaceLine")));
-            pPlayer.sendMessage(Message.error(Msg.msgNode.get("PaternTypes")));
-            pPlayer.sendMessage(Message.error(Msg.msgNode.get("PaternTypesDetail")));
-            pPlayer.sendMessage(Message.error(Msg.msgNode.get("SpaceLine")));
+            pPlayer.sendMessage(Message.error(translateManager.translate("HeaderIsoworld")));
+            pPlayer.sendMessage(Message.error(translateManager.translate("SpaceLine")));
+            pPlayer.sendMessage(Message.error(translateManager.translate("PaternTypes")));
+            pPlayer.sendMessage(Message.error(translateManager.translate("PaternTypesDetail")));
+            pPlayer.sendMessage(Message.error(translateManager.translate("SpaceLine")));
             return CommandResult.success();
         }
 
@@ -129,13 +131,13 @@ public class CreateCommand implements CommandExecutor {
                     // Loading
                     Sponge.game().server().worldManager().loadWorld(ResourceKey.brigadier(worldName));
 
-                    pPlayer.sendMessage(Message.success(Msg.msgNode.get("IsoworldsuccessCreate")));
+                    pPlayer.sendMessage(Message.success(translateManager.translate("IsoworldsuccessCreate")));
 
                     // Teleport
                     Locations.teleport(pPlayer, worldName);
 
                     // Welcome title (only sponge)
-                    pPlayer.showTitle(Title.title(Component.text(Msg.msgNode.get("Welcome1") + pPlayer.name()), Component.text(Msg.msgNode.get("Welcome2"))));
+                    pPlayer.showTitle(Title.title(Component.text(translateManager.translate("Welcome1") + pPlayer.name()), Component.text(translateManager.translate("Welcome2"))));
                 }
             }
         } catch (SQLException e) {

@@ -55,8 +55,12 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataQuery;
+import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.WorldTypes;
 import org.spongepowered.api.world.border.WorldBorder;
+import org.spongepowered.api.world.difficulty.Difficulties;
+import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
@@ -134,8 +138,12 @@ public class DimsAltAction {
             } else {
                 WorldTemplate template = WorldTemplate.builder()
                         .displayName(Component.text(worldname))
+                        .worldType(WorldTypes.OVERWORLD)
+                        .difficulty(Difficulties.HARD)
+                        .gameMode(GameModes.SURVIVAL)
                         .loadOnStartup(true)
                         .performsSpawnLogic(false)
+                        .key(ResourceKey.brigadier(worldname))
                         .pvp(false)
                         .build();
                 sponge.util.console.Logger.info("WOLRD PROPERTIES: non présents, création...");

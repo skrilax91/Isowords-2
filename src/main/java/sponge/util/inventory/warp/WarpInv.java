@@ -36,21 +36,19 @@ import org.spongepowered.api.item.inventory.menu.ClickTypes;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
+import sponge.Main;
+import sponge.Translation.TranslateManager;
 import sponge.util.inventory.MainInv;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static common.Msg.msgNode;
-import static sponge.Main.instance;
-
 public class WarpInv {
+    private static TranslateManager translateManager = Main.instance.translateManager;
+
     public static InventoryMenu getInv(ServerPlayer pPlayer) {
 
-        ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X1).completeStructure().carrier(pPlayer).build();
+        ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X1).completeStructure().plugin(Main.instance.getContainer()).carrier(pPlayer).build();
         InventoryMenu menu = inventory.asMenu();
         menu.setReadOnly(true);
-        menu.setTitle(Component.text("Isoworlds: " + msgNode.get("InvWarp")).color(NamedTextColor.DARK_GREEN));
+        menu.setTitle(Component.text("Isoworlds: " + translateManager.translate("InvWarp")).color(NamedTextColor.DARK_GREEN));
 
         menu.registerSlotClick(new SlotClickHandler() {
             @Override

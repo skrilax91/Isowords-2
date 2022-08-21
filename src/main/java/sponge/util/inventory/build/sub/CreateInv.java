@@ -36,60 +36,62 @@ import org.spongepowered.api.item.inventory.menu.ClickTypes;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
+import sponge.Main;
+import sponge.Translation.TranslateManager;
 import sponge.util.inventory.MainInv;
 import sponge.util.inventory.build.BuildInv;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static common.Msg.msgNode;
-
 public class CreateInv {
+
+    private static TranslateManager translateManager = Main.instance.translateManager;
 
     public static InventoryMenu getInv(ServerPlayer pPlayer) {
 
-        ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X1).completeStructure().carrier(pPlayer).build();
+        ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X1).completeStructure().plugin(Main.instance.getContainer()).carrier(pPlayer).build();
         InventoryMenu menu = inventory.asMenu();
         menu.setReadOnly(true);
-        menu.setTitle(Component.text("Isoworlds: " + msgNode.get("InvBuild")).color(NamedTextColor.BLUE));
+        menu.setTitle(Component.text("Isoworlds: " + translateManager.translate("InvBuild")).color(NamedTextColor.BLUE));
 
         // Minage
         List<Component> list1 = new ArrayList<>();
-        list1.add(Component.text(msgNode.get("BuildNormalLore")));
+        list1.add(Component.text(translateManager.translate("BuildNormalLore")));
 
-        ItemStack item1 = ItemStack.builder().itemType(ItemTypes.WHITE_WOOL).add(Keys.LORE, list1).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("BuildNormal"))
+        ItemStack item1 = ItemStack.builder().itemType(ItemTypes.WHITE_WOOL).add(Keys.LORE, list1).add(Keys.DISPLAY_NAME, Component.text(translateManager.translate("BuildNormal"))
                 .color(NamedTextColor.WHITE)).quantity(1).build();
         menu.inventory().set(0, item1);
 
         // Exploration
         List<Component> list2 = new ArrayList<>();
-        list2.add(Component.text(msgNode.get("BuildVoidLore")));
+        list2.add(Component.text(translateManager.translate("BuildVoidLore")));
 
-        ItemStack item2 = ItemStack.builder().itemType(ItemTypes.FILLED_MAP).add(Keys.LORE, list2).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("BuildVoid"))
+        ItemStack item2 = ItemStack.builder().itemType(ItemTypes.FILLED_MAP).add(Keys.LORE, list2).add(Keys.DISPLAY_NAME, Component.text(translateManager.translate("BuildVoid"))
                 .color(NamedTextColor.RED)).quantity(1).build();
         menu.inventory().set(1, item2);
 
         // End
         List<Component> list3 = new ArrayList<>();
-        list3.add(Component.text(msgNode.get("BuildOceanLore")));
+        list3.add(Component.text(translateManager.translate("BuildOceanLore")));
 
-        ItemStack item3 = ItemStack.builder().itemType(ItemTypes.ENDER_PEARL).add(Keys.LORE, list3).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("BuildOcean"))
+        ItemStack item3 = ItemStack.builder().itemType(ItemTypes.ENDER_PEARL).add(Keys.LORE, list3).add(Keys.DISPLAY_NAME, Component.text(translateManager.translate("BuildOcean"))
                 .color(NamedTextColor.BLUE)).quantity(1).build();
         menu.inventory().set(2, item3);
 
         // Nether
         List<Component> list4 = new ArrayList<>();
-        list4.add(Component.text(msgNode.get("BuildFlatLore")));
+        list4.add(Component.text(translateManager.translate("BuildFlatLore")));
 
-        ItemStack item4 = ItemStack.builder().itemType(ItemTypes.NETHER_STAR).add(Keys.LORE, list4).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("BuildFlat"))
+        ItemStack item4 = ItemStack.builder().itemType(ItemTypes.NETHER_STAR).add(Keys.LORE, list4).add(Keys.DISPLAY_NAME, Component.text(translateManager.translate("BuildFlat"))
                 .color(NamedTextColor.GREEN)).quantity(1).build();
         menu.inventory().set(3, item4);
 
         // Menu principal
         List<Component> list9 = new ArrayList<>();
-        list9.add(Component.text(msgNode.get("MainMenuLore")));
+        list9.add(Component.text(translateManager.translate("MainMenuLore")));
 
-        ItemStack item9 = ItemStack.builder().itemType(ItemTypes.GOLD_BLOCK).add(Keys.LORE, list9).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("InvBuild"))
+        ItemStack item9 = ItemStack.builder().itemType(ItemTypes.GOLD_BLOCK).add(Keys.LORE, list9).add(Keys.DISPLAY_NAME, Component.text(translateManager.translate("InvBuild"))
                 .color(NamedTextColor.RED)).quantity(1).build();
         menu.inventory().set(8, item9);
 

@@ -31,6 +31,7 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.MatterType;
 import org.spongepowered.api.data.type.MatterTypes;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3d;
@@ -74,7 +75,7 @@ public class Locations {
         return Optional.of(y);
     }
 
-    public static boolean teleport(Player player, String worldname) {
+    public static boolean teleport(ServerPlayer player, String worldname) {
 
         ServerLocation maxy;
         Optional<ServerWorld> finalWorld = plugin.getGame().server().worldManager().world(ResourceKey.brigadier(worldname));

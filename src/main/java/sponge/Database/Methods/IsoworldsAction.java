@@ -74,8 +74,10 @@ public class IsoworldsAction {
             delete_isoworld.executeUpdate();
         } catch (Exception ex) {
             ex.printStackTrace();
+            connection.close();
             return false;
         }
+        connection.close();
         return true;
     }
 
@@ -102,8 +104,11 @@ public class IsoworldsAction {
             check.setString(3, Main.instance.servername);
             // Request
             ResultSet res = check.executeQuery();
-            if (res.isBeforeFirst())
+            if (res.isBeforeFirst()) {
+                connection.close();
                 return true;
+            }
+            connection.close();
         } catch (Exception se) {
             se.printStackTrace();
             return false;
@@ -136,14 +141,18 @@ public class IsoworldsAction {
             insert.setInt(5, 0);
             // DIMENSION_ID
             int id = getNextDimensionId();
-            if (id == 0)
+            if (id == 0) {
+                connection.close();
                 return false;
+            }
             insert.setInt(6, id);
             insert.executeUpdate();
+            connection.close();
         } catch (Exception ex) {
             ex.printStackTrace();
             return false;
         }
+        connection.close();
         return true;
     }
 
@@ -318,6 +327,7 @@ public class IsoworldsAction {
         } catch (Exception se) {
             se.printStackTrace();
         }
+        connection.close();
         return dimList;
     }
 

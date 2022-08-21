@@ -36,97 +36,99 @@ import org.spongepowered.api.item.inventory.menu.ClickTypes;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
+import sponge.Main;
+import sponge.Translation.TranslateManager;
 import sponge.util.inventory.MainInv;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static common.Msg.msgNode;
-
 public class BiomeInv {
+
+    private static TranslateManager translateManager = Main.instance.translateManager;
 
     // BIOME
     public static InventoryMenu getInv(ServerPlayer pPlayer) {
 
-        ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X2).completeStructure().carrier(pPlayer).build();
+        ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X2).completeStructure().plugin(Main.instance.getContainer()).carrier(pPlayer).build();
         InventoryMenu menu = inventory.asMenu();
         menu.setReadOnly(true);
         menu.setTitle(Component.text("Isoworlds: Biome"));
 
         // Plaines
         List<Component> list1 = new ArrayList<>();
-        list1.add(Component.text(msgNode.get("BiomePlainLore")));
-        list1.add(Component.text(msgNode.get("BiomePlainLore2")));
+        list1.add(Component.text(translateManager.translate("BiomePlainLore")));
+        list1.add(Component.text(translateManager.translate("BiomePlainLore2")));
 
-        ItemStack item1 = ItemStack.builder().itemType(ItemTypes.GRASS).add(Keys.LORE, list1).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("BiomePlain"))
+        ItemStack item1 = ItemStack.builder().itemType(ItemTypes.GRASS).add(Keys.LORE, list1).add(Keys.DISPLAY_NAME, Component.text(translateManager.translate("BiomePlain"))
                 .color(NamedTextColor.GREEN)).quantity(1).build();
         menu.inventory().set(0, item1);
 
         // Désert
         List<Component> list2 = new ArrayList<>();
-        list2.add(Component.text(msgNode.get("BiomeDesertLore")));
-        list2.add(Component.text(msgNode.get("BiomeDesertLore2")));
+        list2.add(Component.text(translateManager.translate("BiomeDesertLore")));
+        list2.add(Component.text(translateManager.translate("BiomeDesertLore2")));
 
-        ItemStack item2 = ItemStack.builder().itemType(ItemTypes.SAND).add(Keys.LORE, list2).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("BiomeDesert"))
+        ItemStack item2 = ItemStack.builder().itemType(ItemTypes.SAND).add(Keys.LORE, list2).add(Keys.DISPLAY_NAME, Component.text(translateManager.translate("BiomeDesert"))
                 .color(NamedTextColor.YELLOW)).quantity(1).build();
         menu.inventory().set(1, item2);
 
         // Marais
         List<Component> list3 = new ArrayList<>();
-        list3.add(Component.text(msgNode.get("BiomeSwampLore")));
-        list3.add(Component.text(msgNode.get("BiomeSwampLore2")));
+        list3.add(Component.text(translateManager.translate("BiomeSwampLore")));
+        list3.add(Component.text(translateManager.translate("BiomeSwampLore2")));
 
-        ItemStack item3 = ItemStack.builder().itemType(ItemTypes.CLAY).add(Keys.LORE, list3).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("BiomeSwamp"))
+        ItemStack item3 = ItemStack.builder().itemType(ItemTypes.CLAY).add(Keys.LORE, list3).add(Keys.DISPLAY_NAME, Component.text(translateManager.translate("BiomeSwamp"))
                 .color(NamedTextColor.GRAY)).quantity(1).build();
         menu.inventory().set(2, item3);
 
         // Océan
         List<Component> list4 = new ArrayList<>();
-        list4.add(Component.text(msgNode.get("BiomeOceanLore")));
+        list4.add(Component.text(translateManager.translate("BiomeOceanLore")));
 
-        ItemStack item4 = ItemStack.builder().itemType(ItemTypes.BLUE_WOOL).add(Keys.LORE, list4).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("BiomeOcean"))
+        ItemStack item4 = ItemStack.builder().itemType(ItemTypes.BLUE_WOOL).add(Keys.LORE, list4).add(Keys.DISPLAY_NAME, Component.text(translateManager.translate("BiomeOcean"))
                 .color(NamedTextColor.BLUE)).quantity(1).build();
         menu.inventory().set(3, item4);
 
         // Champignon
         List<Component> list5 = new ArrayList<>();
-        list5.add(Component.text(msgNode.get("BiomeMushroomLore")));
-        list5.add(Component.text(msgNode.get("BiomeMushroomLore2")));
+        list5.add(Component.text(translateManager.translate("BiomeMushroomLore")));
+        list5.add(Component.text(translateManager.translate("BiomeMushroomLore2")));
 
-        ItemStack item5 = ItemStack.builder().itemType(ItemTypes.RED_MUSHROOM).add(Keys.LORE, list5).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("BiomeMushroom"))
+        ItemStack item5 = ItemStack.builder().itemType(ItemTypes.RED_MUSHROOM).add(Keys.LORE, list5).add(Keys.DISPLAY_NAME, Component.text(translateManager.translate("BiomeMushroom"))
                 .color(NamedTextColor.RED)).quantity(1).build();
         menu.inventory().set(4, item5);
 
         // Jungle
         List<Component> list6 = new ArrayList<>();
-        list6.add(Component.text(msgNode.get("BiomeJungleLore")));
-        list6.add(Component.text(msgNode.get("BiomeJungleLore2")));
+        list6.add(Component.text(translateManager.translate("BiomeJungleLore")));
+        list6.add(Component.text(translateManager.translate("BiomeJungleLore2")));
 
-        ItemStack item6 = ItemStack.builder().itemType(ItemTypes.JUNGLE_SAPLING).add(Keys.LORE, list6).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("BiomeJungle"))
+        ItemStack item6 = ItemStack.builder().itemType(ItemTypes.JUNGLE_SAPLING).add(Keys.LORE, list6).add(Keys.DISPLAY_NAME, Component.text(translateManager.translate("BiomeJungle"))
                 .color(NamedTextColor.DARK_GREEN)).quantity(1).build();
         menu.inventory().set(5, item6);
 
         // Enfer
         List<Component> list7 = new ArrayList<>();
-        list7.add(Component.text(msgNode.get("BiomeHellLore")));
+        list7.add(Component.text(translateManager.translate("BiomeHellLore")));
 
-        ItemStack item7 = ItemStack.builder().itemType(ItemTypes.NETHERRACK).add(Keys.LORE, list7).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("BiomeHell"))
+        ItemStack item7 = ItemStack.builder().itemType(ItemTypes.NETHERRACK).add(Keys.LORE, list7).add(Keys.DISPLAY_NAME, Component.text(translateManager.translate("BiomeHell"))
                 .color(NamedTextColor.DARK_RED)).quantity(1).build();
         menu.inventory().set(6, item7);
 
         // End
         List<Component> list8 = new ArrayList<>();
-        list8.add(Component.text(msgNode.get("BiomeEndLore")));
+        list8.add(Component.text(translateManager.translate("BiomeEndLore")));
 
-        ItemStack item8 = ItemStack.builder().itemType(ItemTypes.END_STONE).add(Keys.LORE, list8).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("BiomeEnd"))
+        ItemStack item8 = ItemStack.builder().itemType(ItemTypes.END_STONE).add(Keys.LORE, list8).add(Keys.DISPLAY_NAME, Component.text(translateManager.translate("BiomeEnd"))
                 .color(NamedTextColor.DARK_PURPLE)).quantity(1).build();
         menu.inventory().set(7, item8);
 
         // Menu principal
         List<Component> list9 = new ArrayList<>();
-        list9.add(Component.text(msgNode.get("MainMenuLore")));
+        list9.add(Component.text(translateManager.translate("MainMenuLore")));
 
-        ItemStack item9 = ItemStack.builder().itemType(ItemTypes.GOLD_BLOCK).add(Keys.LORE, list9).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("MainMenu"))
+        ItemStack item9 = ItemStack.builder().itemType(ItemTypes.GOLD_BLOCK).add(Keys.LORE, list9).add(Keys.DISPLAY_NAME, Component.text(translateManager.translate("MainMenu"))
                 .color(NamedTextColor.RED)).quantity(1).build();
         menu.inventory().set(8, item9);
 

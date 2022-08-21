@@ -25,13 +25,11 @@
 package sponge.listener;
 
 import common.ManageFiles;
-import common.Msg;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -47,6 +45,7 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import sponge.Database.Methods.IsoworldsAction;
+import sponge.Translation.TranslateManager;
 import sponge.location.Locations;
 import sponge.util.console.Logger;
 import sponge.Main;
@@ -64,11 +63,9 @@ import java.sql.ResultSet;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import static common.Msg.msgNode;
-import static sponge.Main.instance;
-
 public class Listeners {
-    private final Main plugin = instance;
+    private final Main plugin = Main.instance;
+    private static TranslateManager translateManager = Main.instance.translateManager;
 
     @Listener
     public void onRespawnPlayerEvent(RespawnPlayerEvent event) {
@@ -128,7 +125,7 @@ public class Listeners {
         // Welcome message and open menu for those who do not have their own Isoworld
         if (!IsoworldsAction.iwExists(event.player().uniqueId().toString())) {
             Sponge.asyncScheduler().submit(Task.builder().plugin(Main.instance.getContainer()).execute(() -> {
-                event.player().sendMessage(Message.success(msgNode.get("FirstJoin")));
+                event.player().sendMessage(Message.success(translateManager.translate("FirstJoin")));
                 try {
                     Sponge.server().commandManager().process(event.player(), "iw");
                 } catch (CommandException e) {
@@ -140,8 +137,12 @@ public class Listeners {
 
     @Listener
     public void onLogin(ServerSideConnectionEvent.Login event) {
-        String worldname = ("Isolonice");
-        Sponge.asyncScheduler().submit(Task.builder().plugin(Main.instance.getContainer()).execute(() -> Locations.teleport(event.user().player().get(), worldname)).delay(1 / 5, TimeUnit.SECONDS).build());
+        String worldname = Main.instance.getConfig().mainWorld();
+        Sponge.asyncScheduler().submit(Task.builder()
+                .plugin(Main.instance.getContainer())
+                .execute(() -> event.setToLocation(ServerLocation.of(ResourceKey.brigadier(worldname), 0, 60, 0)))
+                .delay(1 / 5, TimeUnit.SECONDS)
+                .build());
     }
 
     // Logout event, tp spawn
@@ -258,7 +259,7 @@ public class Listeners {
                 }
 
             } catch (Exception se) {
-                pPlayer.sendMessage(Message.error(Msg.msgNode.get("IsoworldNotFound")));
+                pPlayer.sendMessage(Message.error(translateManager.translate("IsoworldNotFound")));
             }
 
         }

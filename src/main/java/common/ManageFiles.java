@@ -31,6 +31,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ManageFiles {
 
@@ -102,7 +103,10 @@ public class ManageFiles {
     // Si contient @ alors add to list et retourne
     public static List<File> getOutSAS(File currDir) {
         List<File> dirs = new ArrayList<>();
-        for (File file : currDir.listFiles()) {
+        if (!currDir.exists())
+            return dirs;
+
+        for (File file : Objects.requireNonNull(currDir.listFiles())) {
             if (file.isDirectory() & file.getName().contains("-Isoworld")) {
                 dirs.add(file);
             }

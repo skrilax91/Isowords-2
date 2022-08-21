@@ -44,6 +44,7 @@ import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.scheduler.Task;
 import sponge.Database.Methods.IsoworldsAction;
 import sponge.Main;
+import sponge.Translation.TranslateManager;
 import sponge.location.Locations;
 import sponge.util.action.StatAction;
 import sponge.util.action.StorageAction;
@@ -54,23 +55,22 @@ import java.sql.ResultSet;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import static common.Msg.msgNode;
-
 public class TrustAccessInv {
+    private static TranslateManager translateManager = Main.instance.translateManager;
 
     private static final Main plugin = Main.instance;
 
     public static InventoryMenu getInv(ServerPlayer pPlayer) {
 
-        ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X4).completeStructure().carrier(pPlayer).build();
+        ViewableInventory inventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X4).completeStructure().plugin(Main.instance.getContainer()).carrier(pPlayer).build();
         InventoryMenu menu = inventory.asMenu();
         menu.setReadOnly(true);
-        menu.setTitle(Component.text("Isoworlds: > " + msgNode.get("TrustAccess")).color(NamedTextColor.BLUE));
+        menu.setTitle(Component.text("Isoworlds: > " + translateManager.translate("TrustAccess")).color(NamedTextColor.BLUE));
 
         List<Component> list9 = new ArrayList<>();
-        list9.add(Component.text(msgNode.get("MainMenuLore")));
+        list9.add(Component.text(translateManager.translate("MainMenuLore")));
 
-        ItemStack item9 = ItemStack.builder().itemType(ItemTypes.GOLD_BLOCK).add(Keys.LORE, list9).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("MainMenu"))
+        ItemStack item9 = ItemStack.builder().itemType(ItemTypes.GOLD_BLOCK).add(Keys.LORE, list9).add(Keys.DISPLAY_NAME, Component.text(translateManager.translate("MainMenu"))
                 .color(NamedTextColor.RED)).quantity(1).build();
         menu.inventory().set(35, item9);
 
@@ -93,7 +93,7 @@ public class TrustAccessInv {
                 List<Component> list1 = new ArrayList<>();
                 list1.add(Component.text(user.get().uniqueId().toString()));
 
-                ItemStack item1 = ItemStack.builder().itemType(ItemTypes.PLAYER_HEAD).add(Keys.LORE, list1).add(Keys.DISPLAY_NAME, Component.text(msgNode.get("TrustAccessLore2") + ": " + user.get().name())
+                ItemStack item1 = ItemStack.builder().itemType(ItemTypes.PLAYER_HEAD).add(Keys.LORE, list1).add(Keys.DISPLAY_NAME, Component.text(translateManager.translate("TrustAccessLore2") + ": " + user.get().name())
                         .color(NamedTextColor.GOLD)).quantity(1).build();
                 menu.inventory().set(i, item1);
 

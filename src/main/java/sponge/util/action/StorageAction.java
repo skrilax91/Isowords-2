@@ -158,7 +158,7 @@ public class StorageAction {
             // SERVEUR_ID
             check.setString(1, plugin.servername);
             // Requête
-            check.executeQuery();
+            check.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
             return false;

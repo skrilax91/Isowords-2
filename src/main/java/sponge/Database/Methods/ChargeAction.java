@@ -25,7 +25,6 @@
 package sponge.Database.Methods;
 
 import common.Manager;
-import common.Msg;
 import sponge.Database.MysqlHandler;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
@@ -64,11 +63,12 @@ public class ChargeAction {
                 return res.getInt(1);
 
             initCharges(pPlayer);
-            return 0;
         } catch (Exception se) {
             se.printStackTrace();
-            return 0;
         }
+
+        connection.close();
+        return 0;
     }
 
 
@@ -96,8 +96,10 @@ public class ChargeAction {
             check.executeUpdate();
         } catch (Exception se) {
             se.printStackTrace();
+            connection.close();
             return false;
         }
+        connection.close();
         return true;
     }
 
@@ -120,8 +122,10 @@ public class ChargeAction {
             insert.executeUpdate();
         } catch (Exception ex) {
             ex.printStackTrace();
+            connection.close();
             return false;
         }
+        connection.close();
         return true;
     }
 }

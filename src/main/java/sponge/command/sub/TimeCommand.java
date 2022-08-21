@@ -25,7 +25,6 @@
 package sponge.command.sub;
 
 import common.Cooldown;
-import common.Msg;
 import sponge.Database.Methods.ChargeAction;
 import sponge.Database.Methods.TrustAction;
 import net.kyori.adventure.text.Component;
@@ -38,6 +37,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.util.MinecraftDayTime;
 import sponge.Main;
 import org.spongepowered.api.command.CommandResult;
+import sponge.Translation.TranslateManager;
 import sponge.util.action.StatAction;
 import sponge.util.message.Message;
 
@@ -45,6 +45,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class TimeCommand implements CommandExecutor {
+    private static TranslateManager translateManager = Main.instance.translateManager;
 
     private final Main instance = Main.instance;
 
@@ -70,28 +71,28 @@ public class TimeCommand implements CommandExecutor {
         }
 
         if (charges <= 0) {
-            pPlayer.sendMessage(sponge.util.message.Message.error(Msg.msgNode.get("ChargeEmpty")));
+            pPlayer.sendMessage(sponge.util.message.Message.error(translateManager.translate("ChargeEmpty")));
             return CommandResult.success();
         }
 
         // Check if actual world is an Isoworld
         if (!pPlayer.world().properties().name().contains("-Isoworld")) {
-            pPlayer.sendMessage(Message.error(Msg.msgNode.get("NotInAIsoworld")));
+            pPlayer.sendMessage(Message.error(translateManager.translate("NotInAIsoworld")));
             return CommandResult.success();
         }
 
         // Check if player is trusted
         if (!TrustAction.isTrusted(pPlayer, pPlayer.world().properties().name())) {
-            pPlayer.sendMessage(Message.error(Msg.msgNode.get("NotTrusted")));
+            pPlayer.sendMessage(Message.error(translateManager.translate("NotTrusted")));
             return CommandResult.success();
         }
 
         if (!context.hasAny(Parameter.key("time", String.class))) {
-            pPlayer.sendMessage(Message.success(Msg.msgNode.get("HeaderIsoworld")));
-            pPlayer.sendMessage(Message.success(Msg.msgNode.get("SpaceLine")));
-            pPlayer.sendMessage(Message.success (Msg.msgNode.get("TimeTypes")));
-            pPlayer.sendMessage(Message.success(Msg.msgNode.get("TimeTypesDetail")));
-            pPlayer.sendMessage(Message.success(Msg.msgNode.get("SpaceLine")));
+            pPlayer.sendMessage(Message.success(translateManager.translate("HeaderIsoworld")));
+            pPlayer.sendMessage(Message.success(translateManager.translate("SpaceLine")));
+            pPlayer.sendMessage(Message.success (translateManager.translate("TimeTypes")));
+            pPlayer.sendMessage(Message.success(translateManager.translate("TimeTypesDetail")));
+            pPlayer.sendMessage(Message.success(translateManager.translate("SpaceLine")));
             return CommandResult.success();
         }
 
@@ -105,12 +106,12 @@ public class TimeCommand implements CommandExecutor {
 
         // Send message to all players
         for (ServerPlayer p : pPlayer.world().players()) {
-            p.sendMessage(Message.success(Msg.msgNode.get("TimeChangeSuccess") + " " + pPlayer.name()));
+            p.sendMessage(Message.success(translateManager.translate("TimeChangeSuccess") + " " + pPlayer.name()));
         }
 
         try {
             if (ChargeAction.updateCharge(pPlayer, charges - 1))
-                pPlayer.sendMessage(Message.success(Msg.msgNode.get("ChargeUsed")));
+                pPlayer.sendMessage(Message.success(translateManager.translate("ChargeUsed")));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

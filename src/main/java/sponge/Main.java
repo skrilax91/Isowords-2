@@ -51,6 +51,7 @@ import sponge.listener.Listeners;
 import sponge.util.action.DimsAltAction;
 import sponge.util.action.StorageAction;
 import sponge.util.console.Logger;
+import sponge.util.task.PlayerStatistic.PlayTime;
 import sponge.util.task.SAS.PreventLoadingAtStart;
 import sponge.util.task.SAS.Push;
 
@@ -92,6 +93,7 @@ public class Main implements IMain {
     @Listener
     public void onRegisterCommands(RegisterCommandEvent<Command.Parameterized> event)
     {
+        logger.info("[IW] Registering server commands...");
         event.register(this.container, Commands.getCommand(), "iw", "Isoworld", "Isoworlds");
     }
 
@@ -151,20 +153,6 @@ public class Main implements IMain {
         Logger.info("Lecture de la configuration...");
         this.initServerName();
 
-        // Copy lang.yml if not in config folder
-        // thx @ryantheleac for intellij module path
-        /*try {
-            final Path localePath = Paths.get(configuration.getParent());
-            final Asset asset = this.pluginContainer.getAsset("lang.yml").orElse(null);
-            if (!new File(localePath.toString() + "/lang.yml").exists()) {
-                if (asset != null) {
-                    asset.copyToDirectory(localePath);
-                }
-            }
-        } catch (IOException io) {
-            io.printStackTrace();
-        }*/
-
         this.cooldown = new Cooldown(this.database, this.servername, "sponge", this.commonLogger);
 
         // Init manager
@@ -190,15 +178,12 @@ public class Main implements IMain {
         }
 
         // PlayTime
-        /*if (config.playTime()) {
+        if (config.playTime()) {
             // Start playtime task
             PlayTime.IncreasePlayTime();
-        }*/
-
+        }
         // *********************
 
-        // Loading messages
-        Msg.keys();
     }
 
     @Listener

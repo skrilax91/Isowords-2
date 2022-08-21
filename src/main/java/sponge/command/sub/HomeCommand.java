@@ -25,7 +25,6 @@
 package sponge.command.sub;
 
 import common.Cooldown;
-import common.Msg;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.command.Command;
@@ -36,6 +35,7 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import sponge.Database.Methods.IsoworldsAction;
 import sponge.Main;
+import sponge.Translation.TranslateManager;
 import sponge.location.Locations;
 
 import org.spongepowered.api.command.CommandResult;
@@ -44,6 +44,7 @@ import sponge.util.action.StorageAction;
 import sponge.util.message.Message;
 
 public class HomeCommand implements CommandExecutor {
+    private static TranslateManager translateManager = Main.instance.translateManager;
 
     public static final Main instance = Main.instance;
 
@@ -83,7 +84,7 @@ public class HomeCommand implements CommandExecutor {
 
         // Check if Isoworld exists and load it if need (true)
         if (!IsoworldsAction.isPresent(pPlayer, true)) {
-            pPlayer.sendMessage(Message.error(Msg.msgNode.get("IsoworldNotFound")));
+            pPlayer.sendMessage(Message.error(translateManager.translate("IsoworldNotFound")));
             return CommandResult.success();
         }
 

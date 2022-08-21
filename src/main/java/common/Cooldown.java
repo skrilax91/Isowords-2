@@ -27,6 +27,7 @@ package common;
 import org.spongepowered.api.entity.living.player.Player;
 import sponge.Database.MysqlHandler;
 import sponge.Main;
+import sponge.Translation.TranslateManager;
 import sponge.util.message.Message;
 
 import java.sql.Connection;
@@ -39,6 +40,8 @@ public class Cooldown implements ICooldown {
     private final MysqlHandler database;
     private final String servername;
     private final String type;
+
+    private static TranslateManager translateManager = Main.instance.translateManager;
 
     public Cooldown(MysqlHandler database, String servername, String type, Logger logger) {
         this.database = database;
@@ -59,7 +62,7 @@ public class Cooldown implements ICooldown {
         Timestamp cooldown = this.getPlayerLastCooldown(pPlayer, type);
         if (cooldown != null) {
             String timerMessage = this.getCooldownTimer(cooldown);
-            pPlayer.sendMessage(Message.error(Msg.msgNode.get("CommandCooldown") + timerMessage));
+            pPlayer.sendMessage(Message.error(translateManager.translate("CommandCooldown") + timerMessage));
             Main.lock.remove(pPlayer.uniqueId().toString() + ";" + String.class.getName());
 
             return false;
