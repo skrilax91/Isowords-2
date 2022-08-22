@@ -16,9 +16,6 @@ public class IsoworldConfiguration {
     @Comment("Locale used in all plugin message, check locales folder for more precision")
     private String localeTag = "en";
 
-    @Comment("Main world name, used to teleport players on login/logout and build safe spawn (avoid death)")
-    private String mainWorld = "isohome";
-
     @Comment("Default spawn position is 0,60,0")
     private String mainWorldSpawnCoordinate = "0;60;0";
 
@@ -48,16 +45,6 @@ public class IsoworldConfiguration {
     public void setServerId(String id)
     {
         this.serverId = id;
-    }
-
-    public String mainWorld()
-    {
-        return this.mainWorld;
-    }
-
-    public void setMainWorld(String name)
-    {
-        this.mainWorld = name;
     }
 
     public boolean playTime()

@@ -27,11 +27,13 @@ package sponge.command.sub;
 import common.Cooldown;
 import common.ManageFiles;
 import net.kyori.adventure.text.Component;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import sponge.database.Methods.IsoworldsAction;
@@ -95,7 +97,8 @@ public class ReforgeCommand implements CommandExecutor {
         confirm.remove(pPlayer.uniqueId().toString());
 
         worldname = (pPlayer.uniqueId().toString() + "-isoworld");
-        ServerWorld spawnWorld = Sponge.server().worldManager().world(Main.instance.getWorldKey("Isolonice")).get();
+        ResourceKey worldKey = DefaultWorldKeys.DEFAULT;
+        ServerWorld spawnWorld = Sponge.server().worldManager().world(worldKey).get();
         File destDir = new File(ManageFiles.getPath() + "/Isoworlds-REFONTE/" + worldname);
         destDir.mkdir();
 

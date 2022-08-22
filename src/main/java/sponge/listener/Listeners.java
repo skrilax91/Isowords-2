@@ -26,6 +26,7 @@ package sponge.listener;
 
 import common.ManageFiles;
 import net.kyori.adventure.text.Component;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
@@ -40,6 +41,7 @@ import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.event.world.UnloadWorldEvent;
 import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import sponge.database.Methods.IsoworldsAction;
@@ -69,12 +71,13 @@ public class Listeners {
     public void onRespawnPlayerEvent(RespawnPlayerEvent event) {
         ServerPlayer p = event.entity();
         String worldname = (p.uniqueId().toString() + "-isoworld");
+        ResourceKey worldKey = DefaultWorldKeys.DEFAULT;
 
         // Teleport to spawn of own Isoworld if is loaded
         if (Sponge.server().worldManager().world(Main.instance.getWorldKey(worldname)).isPresent() && Sponge.server().worldManager().world(Main.instance.getWorldKey(worldname)).get().isLoaded()) {
-            Sponge.asyncScheduler().submit(Task.builder().plugin(Main.instance.getContainer()).execute(() -> Locations.teleport(p, worldname)).delay(2, TimeUnit.MILLISECONDS).build());
-        } else if (Sponge.server().worldManager().world(Main.instance.getWorldKey("Isolonice")).isPresent()) {
-            Sponge.asyncScheduler().submit(Task.builder().plugin(Main.instance.getContainer()).execute(() -> Locations.teleport(p, "Isolonice")).delay(2, TimeUnit.MILLISECONDS).build());
+            Sponge.server().scheduler().submit(Task.builder().plugin(Main.instance.getContainer()).execute(() -> Locations.teleport(p, worldname)).delay(2, TimeUnit.MILLISECONDS).build());
+        } else if (Sponge.server().worldManager().world(worldKey).isPresent()) {
+            Sponge.server().scheduler().submit(Task.builder().plugin(Main.instance.getContainer()).execute(() -> Locations.teleport(p, "Isolonice")).delay(2, TimeUnit.MILLISECONDS).build());
         }
     }
 
@@ -90,7 +93,7 @@ public class Listeners {
 
         String worldname = player.world().properties().name();
 
-        if (worldname.equals("Isolonice")) {
+        if (player.world().properties().key() == DefaultWorldKeys.DEFAULT) {
             event.setCancelled(true);
         }
 
@@ -107,10 +110,11 @@ public class Listeners {
     // On téléporte tous les joueurs à la déconnexion
     @Listener
     public void onStop(StoppingEngineEvent<Server> event) {
+        ResourceKey worldKey = DefaultWorldKeys.DEFAULT;
         Collection<ServerPlayer> players = Sponge.server().onlinePlayers();
-        ServerWorld spawnWorld = Sponge.server().worldManager().world(Main.instance.getWorldKey("Isolonice")).get();
+        ServerWorld spawnWorld = Sponge.server().worldManager().world(worldKey).get();
         ServerLocation spawn = ServerLocation.of(spawnWorld, spawnWorld.properties().spawnPosition());
-        ServerLocation top = Locations.getHighestLoc(spawn).orElse(ServerLocation.of(spawn.world(), Locations.getAxis("Isolonice").x(), 61, Locations.getAxis("Isolonice").z()));
+        ServerLocation top = Locations.getHighestLoc(spawn).orElse(ServerLocation.of(spawn.world(), 0, 61, 0));
 
         for (Player p : players) {
             p.setLocation(top);
@@ -130,10 +134,10 @@ public class Listeners {
 
     @Listener
     public void onLogin(ServerSideConnectionEvent.Login event) {
-        String worldname = Main.instance.getConfig().mainWorld();
+        ResourceKey worldKey = DefaultWorldKeys.DEFAULT;
         Sponge.server().scheduler().submit(Task.builder()
                 .plugin(Main.instance.getContainer())
-                .execute(() -> event.setToLocation(ServerLocation.of(Main.instance.getWorldKey(worldname), 0, 60, 0)))
+                .execute(() -> event.setToLocation(ServerLocation.of(worldKey, 0, 60, 0)))
                 .delay(1 / 5, TimeUnit.SECONDS)
                 .build());
     }
@@ -141,9 +145,10 @@ public class Listeners {
     // Logout event, tp spawn
     @Listener
     public void onLogout(ServerSideConnectionEvent.Disconnect event) {
-        ServerWorld spawnWorld = Sponge.server().worldManager().world(Main.instance.getWorldKey("Isolonice")).get();
+        ResourceKey worldKey = DefaultWorldKeys.DEFAULT;
+        ServerWorld spawnWorld = Sponge.server().worldManager().world(worldKey).get();
         ServerLocation spawn = ServerLocation.of(spawnWorld, spawnWorld.properties().spawnPosition());
-        ServerLocation top = Locations.getHighestLoc(spawn).orElse(ServerLocation.of(spawn.world(), Locations.getAxis("Isolonice").x(), 61, Locations.getAxis("Isolonice").z()));
+        ServerLocation top = Locations.getHighestLoc(spawn).orElse(ServerLocation.of(spawn.world(), 0, 61, 0));
         event.player().setLocation(top);
         Logger.info("Joueur téléporté au spawn");
     }
@@ -176,12 +181,12 @@ public class Listeners {
     // TP lors du unload d'un monde
     @Listener
     public void onUnloadWorld(UnloadWorldEvent event) {
-        String worldname = Main.instance.getConfig().mainWorld();
+        ResourceKey worldKey = DefaultWorldKeys.DEFAULT;
         ServerWorld world = event.world();
 
-        ServerWorld spawnWorld = Sponge.server().worldManager().world(Main.instance.getWorldKey(worldname)).get();
+        ServerWorld spawnWorld = Sponge.server().worldManager().world(worldKey).get();
         ServerLocation spawn = ServerLocation.of(spawnWorld, spawnWorld.properties().spawnPosition());
-        ServerLocation top = Locations.getHighestLoc(spawn).orElse(ServerLocation.of(spawn.world(), Locations.getAxis(worldname).x(), 61, Locations.getAxis(worldname).z()));
+        ServerLocation top = Locations.getHighestLoc(spawn).orElse(ServerLocation.of(spawn.world(), 0, 61, 0));
 
         // Kick players
         for (ServerPlayer p : world.players()) {
@@ -219,14 +224,13 @@ public class Listeners {
 
         // Check if world folder is present
         File checkFolder = new File(ManageFiles.getPath() + eventworld);
-        if (!checkFolder.exists() && eventworld.contains("Isoworld")) {
+        if (!checkFolder.exists() && eventworld.contains("-isoworld")) {
             event.setCancelled(true);
             return;
         }
 
-        Sponge.server().worldManager().loadWorld(Main.instance.getWorldKey(eventworld));
-
         if (eventworld.contains("-isoworld")) {
+            Sponge.server().worldManager().loadWorld(Main.instance.getWorldKey(eventworld));
             try {
                 Connection connection = plugin.database.getConnection();
                 PreparedStatement check = connection.prepareStatement(CHECK);
@@ -247,7 +251,7 @@ public class Listeners {
 
                 // To clean
 
-                if (!rselect.isBeforeFirst() && pPlayer.world().properties().name() != eventworld) {
+                if (!rselect.isBeforeFirst() && !Objects.equals(pPlayer.world().properties().name(), eventworld)) {
                     event.setCancelled(true);
                 }
 
@@ -268,7 +272,7 @@ public class Listeners {
             return;
         }
 
-        if (p.world().properties().name().equals("Isolonice")) {
+        if (p.world().properties().key() == DefaultWorldKeys.DEFAULT) {
             event.setCancelled(true);
         }
     }

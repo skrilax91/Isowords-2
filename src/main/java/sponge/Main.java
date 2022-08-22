@@ -131,7 +131,6 @@ public class Main implements IMain {
 
         // Log configs
         logger.info("[IW][CONFIG] id: " + this.config.serverId());
-        logger.info("[IW][CONFIG] main_worldname: " + this.config.mainWorld());
         logger.info("[IW][CONFIG] main_world_spawn_coordinate: " + this.config.mainWorldSpawnCoordinate());
         logger.info("[IW][CONFIG] inactivity_before_world_unload: " + this.config.modules().automaticUnload().inactivityTime());
 

@@ -37,6 +37,9 @@ import java.util.Objects;
 
 public class ManageFiles {
 
+    public static String mainPath = System.getProperty("user.dir") + "/Isoworlds2";
+    public static String SASPath = mainPath + "/isoworlds-SAS";
+
     public static void copyFileOrFolder(File source, File dest, CopyOption... options) throws IOException {
         Main.instance.getLogger().info("Copying file : " + source.getPath());
         Main.instance.getLogger().info("Destina file : " + dest.getPath());
@@ -90,17 +93,20 @@ public class ManageFiles {
     }
 
     // Move directory
-    public static boolean move(String source, String dest) {
-        // File (or Directory) to be moved
-        File file = new File(source);
+    public static void move(File source, File dest) throws IOException {
 
-        // Destination directory
-        File dir = new File(dest);
+        if (source.isDirectory()) {
+            if (!dest.exists()) {
+                dest.mkdir();
+            }
 
-        // Move file to a new directory
-        boolean success = file.renameTo(new File(dir, file.getName()));
-
-        return success;
+            for (String child : Objects.requireNonNull(source.list())) {
+                move(new File(source, child), new File(dest, child));
+            }
+            Files.delete(source.toPath());
+        } else {
+            Files.move(source.toPath(), dest.toPath());
+        }
     }
 
     // Récupère la liste des dossiers tag
@@ -144,7 +150,7 @@ public class ManageFiles {
 
     // Récupération du chemin racine
     public static String getPath() {
-        Path path = Paths.get((System.getProperty("user.dir") + "/" + Main.instance.getConfig().mainWorld() + "/dimensions/" + Main.instance.getContainer().metadata().id().toString()));
+        Path path = Paths.get((System.getProperty("user.dir") + "/world/dimensions/" + Main.instance.getContainer().metadata().id().toString()));
         if (!Files.exists(path)) {
             try {
                 Files.createDirectory(path);
@@ -174,23 +180,13 @@ public class ManageFiles {
     // Init needed dirs
     public static void initIsoworldsDirs() {
 
-        File utils = new File(ManageFiles.getPath() + "/Isoworlds-UTILS/");
-        File sas = new File(ManageFiles.getPath() + "/Isoworlds-UTILS/Isoworlds-SAS");
-        File patern = new File(ManageFiles.getPath() + "/Isoworlds-UTILS/Isoworlds-PATERN");
-        File paternF = new File(ManageFiles.getPath() + "/Isoworlds-UTILS/Isoworlds-PATERN-F");
-        File paternO = new File(ManageFiles.getPath() + "/Isoworlds-UTILS/Isoworlds-PATERN-O");
-        File paternV = new File(ManageFiles.getPath() + "/Isoworlds-UTILS/Isoworlds-PATERN-V");
+        File utils = new File(ManageFiles.mainPath);
+        File sas = new File(ManageFiles.SASPath);
 
         // Create main dir
         utils.mkdir();
 
         // Isoworlds-SAS dir
         sas.mkdir();
-
-        // Isoworlds-PATERN dir
-        patern.mkdir();
-        paternF.mkdir();
-        paternO.mkdir();
-        paternV.mkdir();
     }
 }

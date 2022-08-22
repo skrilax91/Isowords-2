@@ -57,7 +57,7 @@ public class Locations {
 
     private static boolean isPassable(ServerWorld w, Double x, int y, Double z) {
         Optional<MatterType> prop = ServerLocation.of(w, x, y, z).block().get(Keys.MATTER_TYPE);
-        return prop.get() == MatterTypes.SOLID.get();
+        return prop.get() != MatterTypes.SOLID.get();
     }
 
     private static Optional<Integer> getHighestY(ServerWorld w, Double x, Double z, int baseY) {

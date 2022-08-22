@@ -25,6 +25,8 @@
 package sponge.command.sub;
 
 import common.Cooldown;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.world.DefaultWorldKeys;
 import sponge.database.Methods.TrustAction;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.command.Command;
@@ -114,7 +116,8 @@ public class UnTrustCommand implements CommandExecutor {
 
         try {
             if (target.isOnline()) {
-                ServerWorld spawnWorld = Sponge.server().worldManager().world(Main.instance.getWorldKey("Isolonice")).get();
+                ResourceKey worldKey = DefaultWorldKeys.DEFAULT;
+                ServerWorld spawnWorld = Sponge.server().worldManager().world(worldKey).get();
                 if (target.player().get().world().properties().name().equals(pPlayer.uniqueId().toString() + "-isoworld")) {
                     target.player().get().setLocation(ServerLocation.of(spawnWorld, spawnWorld.properties().spawnPosition()));
                     pPlayer.sendMessage(Message.error(translateManager.translate("NotTrusted")));
